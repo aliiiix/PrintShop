@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>PrintShop</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <!-- LOGO -->
+        <div class="logo">
+            🖨️ PrintShop
+        </div>
+
+        <h1>Print Your Documents</h1>
+
+        <!-- ========================= -->
+        <!-- UPLOAD / ORDER CARD -->
+        <!-- ========================= -->
+
+        <div class="card" id="uploadCard">
+
+            <h3>Upload File</h3>
+
+            <p class="upload-subtitle">
+                PDF, JPG, PNG or WebP
+            </p>
+
+            <label class="upload-box" for="pdfFile">
+
+                <div class="upload-icon">
+                    📄
+                </div>
+
+                <h3>Upload File</h3>
+
+                <p>Tap here to select your File</p>
+
+                <input
+                    type="file"
+                    id="pdfFile"
+                    accept="application/pdf,image/jpeg,image/png,image/webp"
+                    multiple
+                >
+
+            </label>
+
+            <div id="fileInfo" class="file-info"></div>
+                
+                <div id="filePreview" class="file-preview"></div>
+
+
+            <!-- PRINT TYPE -->
+
+            <h3 class="section-title">
+                Print Type
+            </h3>
+
+            <div class="print-options">
+
+                <label class="option">
+
+                    <input
+                        type="radio"
+                        name="printType"
+                        value="bw"
+                        checked
+                    >
+
+                    <span>
+                        ⚫ B/W
+                    </span>
+
+                    <small>
+                        ₹2 / page
+                    </small>
+
+                </label>
+
+
+                <label class="option">
+
+                    <input
+                        type="radio"
+                        name="printType"
+                        value="color"
+                    >
+
+                    <span>
+                        🌈 Colour
+                    </span>
+
+                    <small>
+                        ₹10 / page
+                    </small>
+
+                </label>
+
+            </div>
+
+
+            <!-- COPIES -->
+
+            <label
+                class="copies-label"
+                for="copies"
+            >
+                Number of Copies
+            </label>
+
+            <input
+                type="number"
+                id="copies"
+                min="1"
+                value="1"
+            >
+
+
+            <!-- TOTAL -->
+
+            <div class="price-box">
+
+                <span>
+                    Total
+                </span>
+
+                <strong id="totalPrice">
+                    ₹0
+                </strong>
+
+            </div>
+
+
+            <!-- CONTINUE -->
+
+            <button id="orderBtn">
+                Continue →
+            </button>
+
+        </div>
+
+
+        <!-- ========================= -->
+        <!-- ORDER SUMMARY -->
+        <!-- IMPORTANT: OUTSIDE uploadCard -->
+        <!-- ========================= -->
+
+        <div
+            id="summarySection"
+            class="card summary-card"
+            style="display: none;"
+        >
+
+            <h2>
+                Order Summary
+            </h2>
+            <div class="order-id-box">
+    <span>🆔 Order ID</span>
+    <strong id="orderId">PS-000000</strong>
+</div>
+
+
+            <!-- FILE LIST -->
+
+            <div id="summaryFiles"></div>
+
+
+            <!-- PAGES -->
+
+            <div class="summary-row">
+
+                <span>
+                    📄 Total Pages
+                </span>
+
+                <strong id="summaryPages">
+                    0
+                </strong>
+
+            </div>
+
+
+            <!-- PRINT TYPE -->
+
+            <div class="summary-row">
+
+                <span>
+                    🖨️ Print Type
+                </span>
+
+                <strong id="summaryType">
+                    B/W
+                </strong>
+
+            </div>
+
+
+            <!-- COPIES -->
+
+            <div class="summary-row">
+
+                <span>
+                    📑 Copies
+                </span>
+
+                <strong id="summaryCopies">
+                    1
+                </strong>
+
+            </div>
+
+
+            <!-- TOTAL -->
+
+            <div class="price-box">
+
+                <span>
+                    Total
+                </span>
+
+                <strong id="summaryTotal">
+                    ₹0
+                </strong>
+
+            </div>
+
+
+            <!-- PAYMENT -->
+
+            <button id="payBtn">
+                Confirm & Pay →
+            </button>
+
+
+            <!-- BACK -->
+
+            <button
+                id="backBtn"
+                type="button"
+            >
+                ← Edit Order
+            </button>
+
+        </div>
+
+
+        <!-- FOOTER -->
+
+        <p class="footer">
+            Fast • Simple • No Queue
+        </p>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

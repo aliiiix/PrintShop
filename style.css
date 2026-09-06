@@ -1,0 +1,277 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f6f8;
+    color: #111;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px;
+    margin: auto;
+    padding: 24px 18px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-bottom: 30px;
+}
+
+h1 {
+    font-size: 32px;
+    line-height: 1.15;
+    margin-bottom: 12px;
+}
+
+.subtitle {
+    color: #666;
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 25px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+}
+
+.upload-box {
+    display: block;
+    border: 2px dashed #aaa;
+    border-radius: 14px;
+    padding: 25px 15px;
+    text-align: center;
+    cursor: pointer;
+    margin-bottom: 20px;
+}
+
+.upload-icon {
+    font-size: 42px;
+    margin-bottom: 8px;
+}
+
+.upload-box h3 {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.upload-box p {
+    color: #777;
+    font-size: 14px;
+}
+
+#pdfFile {
+    display: none;
+}
+
+.file-info {
+    font-size: 14px;
+    margin-bottom: 20px;
+    color: #444;
+}
+
+.section-title {
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+.print-options {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.option {
+    flex: 1;
+    border: 2px solid #ddd;
+    border-radius: 12px;
+    padding: 14px 10px;
+    cursor: pointer;
+}
+
+.option:has(input:checked) {
+    border-color: #111;
+    background: #f5f5f5;
+}
+
+.option input {
+    margin-right: 5px;
+}
+
+.option span {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.option small {
+    color: #666;
+}
+
+.copies-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+#copies {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.price-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f1f1f1;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+}
+
+.price-box span {
+    font-size: 16px;
+}
+
+.price-box strong {
+    font-size: 24px;
+}
+
+#orderBtn {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    background: #111;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#orderBtn:active {
+    transform: scale(0.98);
+}
+
+.footer {
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+    margin-top: 25px;
+}
+.summary-card h2 {
+    font-size: 26px;
+    margin-bottom: 20px;
+}
+
+.summary-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.summary-row strong {
+    font-weight: bold;
+}
+
+#payBtn {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    background: #111;
+    color: white;
+    font-size: 17px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+#backBtn {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 12px;
+    padding: 13px;
+    background: white;
+    color: #111;
+    font-size: 16px;
+    font-weight: bold;
+    margin-top: 10px;
+}
+.file-preview {
+    margin-top: 15px;
+}
+
+.preview-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: #f7f7f7;
+    border-radius: 12px;
+}
+
+.preview-thumb {
+    width: 55px;
+    height: 55px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.preview-icon {
+    width: 55px;
+    height: 55px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9e9e9;
+    border-radius: 8px;
+    font-size: 25px;
+}
+
+.preview-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.remove-file {
+    border: none;
+    background: transparent;
+    font-size: 20px;
+    cursor: pointer;
+}
+.order-id-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    margin: 12px 0 15px;
+    background: #f7f7f7;
+    border-radius: 12px;
+}
+
+.order-id-box span {
+    font-size: 14px;
+}
+
+.order-id-box strong {
+    font-size: 15px;
+    letter-spacing: 1px;
+}

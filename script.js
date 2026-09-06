@@ -319,112 +319,87 @@ function generateOrderId() {
 // CONTINUE → ORDER SUMMARY
 // ===============================
 
-orderBtn.addEventListener(
-    "click",
-    function () {
+orderBtn.addEventListener("click", async function () {
+    if (selectedFiles.length === 0) {
+        alert("Please select files first.");
+        return;
+    }
 
-        if (selectedFiles.length === 0) {
+    const type = document.querySelector('input[name="printType"]:checked').value;
+    const copies = Math.max(1, Number(copiesInput.value) || 1);
+    const total = totalPages * copies * prices[type];
 
-            alert("Please select files first.");
+    const newOrderId = generateOrderId();
+    orderId.textContent = newOrderId;
 
-            return;
+    const orderData = {
+        orderId: newOrderId,
 
+        files: selectedFiles.map((file) => ({
+            name: file.name,
+            pages: file.type === "application/pdf" ? 0 : 1
+        })),
+
+        printType: type,
+        copies: copies,
+        totalPages: totalPages,
+        totalAmount: total
+    };
+
+    try {
+        const response = await fetch("/api/orders", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(orderData)
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Order creation failed");
         }
 
-
-        const type =
-            document.querySelector(
-                'input[name="printType"]:checked'
-            ).value;
-
-
-        const copies =
-            Math.max(
-                1,
-                Number(copiesInput.value) || 1
-            );
-
-
-        const total =
-            totalPages *
-            copies *
-            prices[type];
-
-
-        // Generate Order ID
-        orderId.textContent =
-            generateOrderId();
-
-
-        // Clear previous summary
         summaryFiles.innerHTML = "";
 
+        selectedFiles.forEach((file, index) => {
+            const item = document.createElement("div");
 
-        // Add files to summary
-        selectedFiles.forEach(
-            (file, index) => {
+            item.style.padding = "10px";
+            item.style.marginBottom = "8px";
+            item.style.background = "#f5f5f5";
+            item.style.borderRadius = "10px";
+            item.style.fontSize = "14px";
 
-                const item =
-                    document.createElement("div");
+            item.textContent = `📄 ${index + 1}. ${file.name}`;
 
+            summaryFiles.appendChild(item);
+        });
 
-                item.style.padding = "10px";
-
-                item.style.marginBottom = "8px";
-
-                item.style.background = "#f5f5f5";
-
-                item.style.borderRadius = "10px";
-
-                item.style.fontSize = "14px";
-
-
-                item.textContent =
-                    `📄 ${index + 1}. ${file.name}`;
-
-
-                summaryFiles.appendChild(item);
-
-            }
-        );
-
-
-        // Summary information
-        summaryPages.textContent =
-            totalPages;
-
-
+        summaryPages.textContent = totalPages;
         summaryType.textContent =
-            type === "bw"
-                ? "⚫ B/W"
-                : "🌈 Colour";
+            type === "bw" ? "⚫ B/W" : "🌈 Colour";
+        summaryCopies.textContent = copies;
+        summaryTotal.textContent = "₹" + total;
 
-
-        summaryCopies.textContent =
-            copies;
-
-
-        summaryTotal.textContent =
-            "₹" + total;
-
-
-        // Hide upload card
-        document
-            .getElementById("uploadCard")
-            .style.display = "none";
-
-
-        // Show summary
-        summarySection.style.display =
-            "block";
-
+        document.getElementById("uploadCard").style.display = "none";
+        summarySection.style.display = "block";
 
         summarySection.scrollIntoView({
             behavior: "smooth"
         });
 
+    } catch (error) {
+        console.error(error);
+
+        alert(
+            "❌ Order save nahi hua.\n\n" +
+            "Please try again."
+        );
     }
-);
+});
+
 
 
 // ===============================

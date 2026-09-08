@@ -1,389 +1,461 @@
-const fileInput = document.getElementById("pdfFile");
-const fileInfo = document.getElementById("fileInfo");
-const filePreview = document.getElementById("filePreview");
-
-const copiesInput = document.getElementById("copies");
-const totalPrice = document.getElementById("totalPrice");
-const orderBtn = document.getElementById("orderBtn");
-
-const summarySection = document.getElementById("summarySection");
-const summaryFiles = document.getElementById("summaryFiles");
-const summaryPages = document.getElementById("summaryPages");
-const summaryType = document.getElementById("summaryType");
-const summaryCopies = document.getElementById("summaryCopies");
-const summaryTotal = document.getElementById("summaryTotal");
-
-const orderId = document.getElementById("orderId");
-const payBtn = document.getElementById("payBtn");
-const backBtn = document.getElementById("backBtn");
-
-let selectedFiles = [];
-let totalPages = 0;
+const API_BASE = "https://printshop-q8id.onrender.com";
 
 const prices = {
     bw: 2,
     color: 10
 };
 
+let selectedFiles = [];
+let shopOnline = true;
+let currentOrderId = null;
+let statusTimer = null;
+
 
 // ===============================
-// FILE SELECTION
+// ELEMENTS
+// ===============================
+
+const fileInput = document.getElementById("fileInput");
+const fileList = document.getElementById("fileList");
+
+const copiesInput = document.getElementById("copies");
+
+const orderBtn = document.getElementById("orderBtn");
+const cashBtn = document.getElementById("cashBtn");
+const payBtn = document.getElementById("payBtn");
+const editBtn = document.getElementById("editBtn");
+
+const summary = document.getElementById("summary");
+
+const totalPagesEl = document.getElementById("totalPages");
+const totalAmountEl = document.getElementById("totalAmount");
+
+const bwPriceLabel = document.getElementById("bwPriceLabel");
+const colorPriceLabel = document.getElementById("colorPriceLabel");
+
+const shopStatus = document.getElementById("shopStatus");
+const orderStatusBox = document.getElementById("orderStatusBox");
+
+
+// ===============================
+// LOAD SHOP SETTINGS
+// ===============================
+
+async function loadShopSettings() {
+
+    try {
+
+        const response = await fetch(
+            API_BASE + "/api/settings?time=" + Date.now()
+        );
+
+        const data = await response.json();
+
+        if (!data.success) return;
+
+        prices.bw = Number(data.settings.bwPrice);
+        prices.color = Number(data.settings.colorPrice);
+
+        shopOnline = Boolean(data.settings.shopOnline);
+
+        updatePriceLabels();
+        updateShopStatus();
+        calculateTotal();
+
+    } catch (error) {
+
+        console.log("Settings error:", error);
+
+    }
+}
+
+
+// ===============================
+// PRICE LABELS
+// ===============================
+
+function updatePriceLabels() {
+
+    bwPriceLabel.textContent =
+        `₹${prices.bw} / page`;
+
+    colorPriceLabel.textContent =
+        `₹${prices.color} / page`;
+}
+
+
+// ===============================
+// SHOP STATUS
+// ===============================
+
+function updateShopStatus() {
+
+    if (shopOnline) {
+
+        shopStatus.textContent = "🟢 Shop Online";
+        shopStatus.className = "shop-status online";
+
+        fileInput.disabled = false;
+        orderBtn.disabled = selectedFiles.length === 0;
+
+    } else {
+
+        shopStatus.textContent = "🔴 Shop Offline";
+        shopStatus.className = "shop-status offline";
+
+        fileInput.disabled = true;
+        orderBtn.disabled = true;
+
+        cashBtn.disabled = true;
+        payBtn.disabled = true;
+    }
+}
+
+
+// ===============================
+// FILE SELECT
 // ===============================
 
 fileInput.addEventListener("change", async function () {
 
-    const newFiles = Array.from(this.files);
+    selectedFiles = Array.from(this.files);
 
-    if (newFiles.length === 0) return;
+    await renderFiles();
 
-    const allowed = [
-        "application/pdf",
-        "image/jpeg",
-        "image/png",
-        "image/webp"
-    ];
+    calculateTotal();
 
-    const invalid = newFiles.find(
-        file => !allowed.includes(file.type)
-    );
+    updateShopStatus();
 
-    if (invalid) {
-        alert("Only PDF, JPG, PNG and WebP files are allowed.");
-        fileInput.value = "";
-        return;
-    }
+});
 
-    selectedFiles = [...selectedFiles, ...newFiles];
 
-    fileInput.value = "";
+// ===============================
+// SHOW FILES
+// ===============================
 
-    fileInfo.textContent = "⏳ Reading files...";
+async function renderFiles() {
 
-    totalPages = 0;
+    fileList.innerHTML = "";
 
     for (const file of selectedFiles) {
 
+        let pages = 1;
+
         if (file.type === "application/pdf") {
-            totalPages += await getPDFPageCount(file);
-        } else {
-            totalPages += 1;
+
+            pages = await getPDFPages(file);
+
         }
 
+        const div = document.createElement("div");
+
+        div.className = "file-item";
+
+        div.innerHTML = `
+            <span>${escapeHTML(file.name)}</span>
+            <span>${pages} page${pages > 1 ? "s" : ""}</span>
+        `;
+
+        fileList.appendChild(div);
     }
-
-    fileInfo.innerHTML =
-        `📁 <b>${selectedFiles.length} file${selectedFiles.length > 1 ? "s" : ""} selected</b><br>
-         📄 <b>${totalPages} total pages</b>`;
-
-    renderPreview();
-
-    calculatePrice();
-
-});
+}
 
 
 // ===============================
 // PDF PAGE COUNT
 // ===============================
 
-async function getPDFPageCount(file) {
+function getPDFPages(file) {
 
-    try {
+    return new Promise((resolve) => {
 
-        const buffer = await file.arrayBuffer();
+        const reader = new FileReader();
 
-        const text = new TextDecoder("latin1").decode(buffer);
+        reader.onload = function () {
 
-        const matches = text.match(/\/Type\s*\/Page\b/g);
+            const text = new TextDecoder(
+                "latin1"
+            ).decode(reader.result);
 
-        return matches ? matches.length : 1;
+            const matches = text.match(/\/Type\s*\/Page\b/g);
 
-    } catch (error) {
+            resolve(
+                matches && matches.length
+                    ? matches.length
+                    : 1
+            );
+        };
 
-        return 1;
+        reader.onerror = () => resolve(1);
 
-    }
-
+        reader.readAsArrayBuffer(file);
+    });
 }
 
 
 // ===============================
-// FILE PREVIEW
+// TOTAL CALCULATION
 // ===============================
 
-function renderPreview() {
+async function calculateTotal() {
 
-    filePreview.innerHTML = "";
+    let pages = 0;
 
-    selectedFiles.forEach((file, index) => {
+    for (const file of selectedFiles) {
 
-        const item = document.createElement("div");
+        if (file.type === "application/pdf") {
 
-        item.className = "preview-item";
-
-
-        if (file.type.startsWith("image/")) {
-
-            const img = document.createElement("img");
-
-            img.className = "preview-thumb";
-
-            img.src = URL.createObjectURL(file);
-
-            item.appendChild(img);
+            pages += await getPDFPages(file);
 
         } else {
 
-            const icon = document.createElement("div");
-
-            icon.className = "preview-icon";
-
-            icon.textContent = "📄";
-
-            item.appendChild(icon);
+            pages += 1;
 
         }
+    }
 
+    const copies = Math.max(
+        1,
+        Number(copiesInput.value) || 1
+    );
 
-        const name = document.createElement("div");
+    const type =
+        document.querySelector(
+            'input[name="printType"]:checked'
+        ).value;
 
-        name.className = "preview-name";
+    const price =
+        type === "color"
+            ? prices.color
+            : prices.bw;
 
-        name.textContent = file.name;
+    const total =
+        pages * copies * price;
 
-        item.appendChild(name);
+    totalPagesEl.textContent =
+        pages * copies;
 
+    totalAmountEl.textContent =
+        `₹${total}`;
 
-        const removeBtn = document.createElement("button");
-
-        removeBtn.className = "remove-file";
-
-        removeBtn.textContent = "✕";
-
-        removeBtn.type = "button";
-
-
-        removeBtn.addEventListener("click", async function () {
-
-            selectedFiles.splice(index, 1);
-
-            totalPages = 0;
-
-            for (const file of selectedFiles) {
-
-                if (file.type === "application/pdf") {
-                    totalPages += await getPDFPageCount(file);
-                } else {
-                    totalPages += 1;
-                }
-
-            }
-
-
-            if (selectedFiles.length === 0) {
-
-                fileInfo.textContent = "";
-
-                filePreview.innerHTML = "";
-
-            } else {
-
-                fileInfo.innerHTML =
-                    `📁 <b>${selectedFiles.length} file${selectedFiles.length > 1 ? "s" : ""} selected</b><br>
-                     📄 <b>${totalPages} total pages</b>`;
-
-                renderPreview();
-
-            }
-
-            calculatePrice();
-
-        });
-
-
-        item.appendChild(removeBtn);
-
-        filePreview.appendChild(item);
-
-    });
-
+    return {
+        pages,
+        copies,
+        type,
+        total
+    };
 }
 
 
 // ===============================
-// PRINT TYPE
+// PRICE CHANGE
 // ===============================
 
 document
     .querySelectorAll('input[name="printType"]')
-    .forEach(radio => {
+    .forEach((radio) => {
 
-        radio.addEventListener("change", calculatePrice);
+        radio.addEventListener(
+            "change",
+            calculateTotal
+        );
 
     });
 
-
-// ===============================
-// COPIES
-// ===============================
-
 copiesInput.addEventListener(
     "input",
-    calculatePrice
+    calculateTotal
 );
 
 
 // ===============================
-// PRICE
-// ===============================
-
-function calculatePrice() {
-
-    const selectedType =
-        document.querySelector(
-            'input[name="printType"]:checked'
-        );
-
-    const type = selectedType
-        ? selectedType.value
-        : "bw";
-
-    const copies =
-        Math.max(
-            1,
-            Number(copiesInput.value) || 1
-        );
-
-    const total =
-        totalPages *
-        copies *
-        prices[type];
-
-    totalPrice.textContent =
-        "₹" + total;
-
-}
-
-
-// ===============================
-// ORDER ID
-// ===============================
-
-function generateOrderId() {
-
-    const characters =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-    let id = "PS-";
-
-    for (let i = 0; i < 6; i++) {
-
-        id += characters.charAt(
-            Math.floor(
-                Math.random() *
-                characters.length
-            )
-        );
-
-    }
-
-    return id;
-
-}
-
-
-// ===============================
-// CONTINUE → SUMMARY
+// CONTINUE
 // ===============================
 
 orderBtn.addEventListener(
     "click",
-    function () {
+    async function () {
+
+        if (!shopOnline) {
+
+            alert(
+                "🔴 Shop is currently offline."
+            );
+
+            return;
+        }
 
         if (selectedFiles.length === 0) {
 
-            alert("Please select files first.");
+            alert("Please select a file.");
 
             return;
-
         }
 
+        const data =
+            await calculateTotal();
 
-        const type =
-            document.querySelector(
-                'input[name="printType"]:checked'
-            ).value;
+        const orderId =
+            "PS-" +
+            Date.now().toString(36).toUpperCase();
 
-        const copies =
-            Math.max(
-                1,
-                Number(copiesInput.value) || 1
-            );
+        currentOrderId = orderId;
 
-        const total =
-            totalPages *
-            copies *
-            prices[type];
+        document.getElementById(
+            "orderId"
+        ).textContent = orderId;
 
+        document.getElementById(
+            "summaryFiles"
+        ).textContent =
+            selectedFiles
+                .map(file => file.name)
+                .join(", ");
 
-        orderId.textContent =
-            generateOrderId();
+        document.getElementById(
+            "summaryPages"
+        ).textContent =
+            data.pages;
 
+        document.getElementById(
+            "summaryType"
+        ).textContent =
+            data.type === "color"
+                ? "Colour"
+                : "Black & White";
 
-        summaryFiles.innerHTML = "";
+        document.getElementById(
+            "summaryCopies"
+        ).textContent =
+            data.copies;
 
+        document.getElementById(
+            "summaryTotal"
+        ).textContent =
+            data.total;
 
-        selectedFiles.forEach(
-            (file, index) => {
+        orderStatusBox.textContent =
+            "🟡 Order Ready — choose payment";
 
-                const item =
-                    document.createElement("div");
-
-                item.style.padding = "10px";
-
-                item.style.marginBottom = "8px";
-
-                item.style.background = "#f5f5f5";
-
-                item.style.borderRadius = "10px";
-
-                item.style.fontSize = "14px";
-
-                item.textContent =
-                    `📄 ${index + 1}. ${file.name}`;
-
-                summaryFiles.appendChild(item);
-
-            }
+        summary.classList.remove(
+            "hidden"
         );
 
+        orderBtn.disabled = true;
 
-        summaryPages.textContent =
-            totalPages;
+        cashBtn.disabled = false;
+        payBtn.disabled = false;
 
-        summaryType.textContent =
-            type === "bw"
-                ? "⚫ B/W"
-                : "🌈 Colour";
-
-        summaryCopies.textContent =
-            copies;
-
-        summaryTotal.textContent =
-            "₹" + total;
-
-
-        document
-            .getElementById("uploadCard")
-            .style.display = "none";
-
-        summarySection.style.display =
-            "block";
-
-
-        summarySection.scrollIntoView({
+        summary.scrollIntoView({
             behavior: "smooth"
         });
+    }
+);
+
+
+// ===============================
+// CASH ORDER
+// ===============================
+
+cashBtn.addEventListener(
+    "click",
+    async function () {
+
+        if (!shopOnline) {
+
+            alert(
+                "🔴 Shop is currently offline."
+            );
+
+            return;
+        }
+
+        const data =
+            await calculateTotal();
+
+        cashBtn.disabled = true;
+
+        try {
+
+            const response = await fetch(
+                API_BASE + "/api/orders",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+
+                        orderId: currentOrderId,
+
+                        files: selectedFiles.map(
+                            file => ({
+                                name: file.name,
+                                pages: 1
+                            })
+                        ),
+
+                        printType: data.type,
+
+                        copies: data.copies,
+
+                        totalPages: data.pages,
+
+                        totalAmount: data.total,
+
+                        status: "CASH_PENDING"
+                    })
+                }
+            );
+
+            const result =
+                await response.json();
+
+            if (!response.ok) {
+
+                throw new Error(
+                    result.message ||
+                    "Order failed"
+                );
+            }
+
+            orderStatusBox.textContent =
+                "🟡 Cash Pending — Show this Order ID at the shop";
+
+            localStorage.setItem(
+                "printshop_order_id",
+                currentOrderId
+            );
+
+            startOrderStatus();
+
+        } catch (error) {
+
+            cashBtn.disabled = false;
+
+            alert(
+                error.message ||
+                "Unable to place order."
+            );
+        }
+    }
+);
+
+
+// ===============================
+// ONLINE PAYMENT
+// ===============================
+
+payBtn.addEventListener(
+    "click",
+    function () {
+
+        alert(
+            "💳 Online payment will be added soon."
+        );
 
     }
 );
@@ -393,129 +465,187 @@ orderBtn.addEventListener(
 // EDIT ORDER
 // ===============================
 
-backBtn.addEventListener(
+editBtn.addEventListener(
     "click",
     function () {
 
-        summarySection.style.display =
-            "none";
+        summary.classList.add(
+            "hidden"
+        );
 
-        document
-            .getElementById("uploadCard")
-            .style.display = "block";
+        orderBtn.disabled =
+            !shopOnline ||
+            selectedFiles.length === 0;
+
+        cashBtn.disabled = false;
+        payBtn.disabled = false;
 
         window.scrollTo({
             top: 0,
             behavior: "smooth"
         });
-
     }
 );
 
 
 // ===============================
-// ONLINE PAYMENT PLACEHOLDER
+// ORDER STATUS
 // ===============================
 
-payBtn.addEventListener(
-    "click",
-    function () {
+function startOrderStatus() {
 
-        alert(
-            "Payment system coming next! 💳\n\n" +
-            "Order ID: " +
-            orderId.textContent +
-            "\n" +
-            "Total: " +
-            summaryTotal.textContent
-        );
+    if (statusTimer) {
+
+        clearInterval(statusTimer);
 
     }
-);
-const cashBtn = document.getElementById("cashBtn");
 
-cashBtn.addEventListener("click", async function () {
+    checkOrderStatus();
 
-    const type = document.querySelector(
-        'input[name="printType"]:checked'
-    ).value;
-
-    const copies = Math.max(
-        1,
-        Number(copiesInput.value) || 1
+    statusTimer = setInterval(
+        checkOrderStatus,
+        5000
     );
+}
 
-    const total = totalPages * copies * prices[type];
 
-    const currentOrderId = orderId.textContent;
+async function checkOrderStatus() {
 
-    cashBtn.disabled = true;
-    cashBtn.textContent = "⏳ Placing Order...";
+    if (!currentOrderId) return;
 
     try {
 
         const response = await fetch(
-            "https://printshop-q8id.onrender.com/api/orders",
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    orderId: currentOrderId,
-
-                    files: selectedFiles.map(file => ({
-                        name: file.name,
-                        pages: file.type === "application/pdf"
-                            ? 0
-                            : 1
-                    })),
-
-                    printType: type,
-                    copies: copies,
-                    totalPages: totalPages,
-                    totalAmount: total,
-                    status: "CASH_PENDING"
-                })
-            }
+            API_BASE +
+            "/api/orders/" +
+            encodeURIComponent(
+                currentOrderId
+            ) +
+            "?time=" +
+            Date.now()
         );
 
-        const data = await response.json();
+        if (!response.ok) return;
 
-        if (!response.ok || !data.success) {
-            throw new Error(
-                data.message || "Order failed"
-            );
+        const data =
+            await response.json();
+
+        if (!data.success || !data.order) {
+            return;
         }
 
-        alert(
-            "✅ Order Confirmed!\n\n" +
-            "🆔 Order ID: " +
-            currentOrderId +
-            "\n" +
-            "💰 Amount: ₹" +
-            total +
-            "\n\n" +
-            "💵 Pay at the shop when collecting your prints."
+        updateOrderStatus(
+            data.order.status
         );
-
-        cashBtn.textContent = "✅ Order Confirmed";
 
     } catch (error) {
 
-        console.error(error);
-
-        alert(
-            "❌ Order save nahi hua.\n\n" +
-            "Please try again."
+        console.log(
+            "Status error:",
+            error
         );
-
-        cashBtn.disabled = false;
-
-        cashBtn.textContent =
-            "💵 Pay Cash at Shop";
     }
+}
 
-});
+
+// ===============================
+// STATUS UI
+// ===============================
+
+function updateOrderStatus(status) {
+
+    const statuses = {
+
+        CASH_PENDING:
+            "🟡 Cash Pending — Show Order ID at shop",
+
+        PENDING_PAYMENT:
+            "🟡 Payment Pending",
+
+        PAID:
+            "💰 Payment Received",
+
+        ACCEPTED:
+            "✅ Order Accepted",
+
+        PRINTING:
+            "🖨️ Your Order is Printing",
+
+        COMPLETED:
+            "🎉 Order Completed — Collect your prints",
+
+        REJECTED:
+            "❌ Order Rejected"
+    };
+
+    orderStatusBox.textContent =
+        statuses[status] ||
+        "🟡 Order Pending";
+
+    if (
+        status === "COMPLETED" ||
+        status === "REJECTED"
+    ) {
+
+        if (statusTimer) {
+
+            clearInterval(statusTimer);
+
+            statusTimer = null;
+        }
+    }
+}
+
+
+// ===============================
+// RESTORE ORDER
+// ===============================
+
+const savedOrder =
+    localStorage.getItem(
+        "printshop_order_id"
+    );
+
+if (savedOrder) {
+
+    currentOrderId =
+        savedOrder;
+
+    document.getElementById(
+        "orderId"
+    ).textContent =
+        savedOrder;
+
+    summary.classList.remove(
+        "hidden"
+    );
+
+    startOrderStatus();
+}
+
+
+// ===============================
+// ESCAPE HTML
+// ===============================
+
+function escapeHTML(text) {
+
+    const div =
+        document.createElement("div");
+
+    div.textContent = text;
+
+    return div.innerHTML;
+}
+
+
+// ===============================
+// START
+// ===============================
+
+loadShopSettings();
+
+setInterval(
+    loadShopSettings,
+    5000
+);

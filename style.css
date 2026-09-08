@@ -275,3 +275,35 @@ h1 {
     font-size: 15px;
     letter-spacing: 1px;
 }
+/* Continue Button */
+#orderBtn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 18px;
+    border: none;
+    border-radius: 12px;
+    background: #111;
+    color: white;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* Cash at Shop Button */
+#cashBtn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 10px;
+    border: 2px solid #111;
+    border-radius: 12px;
+    background: white;
+    color: #111;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#orderBtn:active,
+#cashBtn:active {
+    transform: scale(0.98);
+}

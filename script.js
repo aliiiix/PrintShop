@@ -319,7 +319,7 @@ function generateOrderId() {
 // CONTINUE → ORDER SUMMARY
 // ===============================
 
-orderBtn.addEventListener("click", async function () {
+orderBtn.addEventListener("click", function () {
     if (selectedFiles.length === 0) {
         alert("Please select files first.");
         return;
@@ -329,75 +329,36 @@ orderBtn.addEventListener("click", async function () {
     const copies = Math.max(1, Number(copiesInput.value) || 1);
     const total = totalPages * copies * prices[type];
 
-    const newOrderId = generateOrderId();
-    orderId.textContent = newOrderId;
+    orderId.textContent = generateOrderId();
 
-    const orderData = {
-        orderId: newOrderId,
+    summaryFiles.innerHTML = "";
 
-        files: selectedFiles.map((file) => ({
-            name: file.name,
-            pages: file.type === "application/pdf" ? 0 : 1
-        })),
+    selectedFiles.forEach((file, index) => {
+        const item = document.createElement("div");
 
-        printType: type,
-        copies: copies,
-        totalPages: totalPages,
-        totalAmount: total
-    };
+        item.style.padding = "10px";
+        item.style.marginBottom = "8px";
+        item.style.background = "#f5f5f5";
+        item.style.borderRadius = "10px";
+        item.style.fontSize = "14px";
 
-    try {
-        const response = await fetch("https://printshop-q8id.onrender.com/api/orders", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(orderData)
-        });
+        item.textContent = `📄 ${index + 1}. ${file.name}`;
 
-        const data = await response.json();
+        summaryFiles.appendChild(item);
+    });
 
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || "Order creation failed");
-        }
+    summaryPages.textContent = totalPages;
+    summaryType.textContent =
+        type === "bw" ? "⚫ B/W" : "🌈 Colour";
+    summaryCopies.textContent = copies;
+    summaryTotal.textContent = "₹" + total;
 
-        summaryFiles.innerHTML = "";
+    document.getElementById("uploadCard").style.display = "none";
+    summarySection.style.display = "block";
 
-        selectedFiles.forEach((file, index) => {
-            const item = document.createElement("div");
-
-            item.style.padding = "10px";
-            item.style.marginBottom = "8px";
-            item.style.background = "#f5f5f5";
-            item.style.borderRadius = "10px";
-            item.style.fontSize = "14px";
-
-            item.textContent = `📄 ${index + 1}. ${file.name}`;
-
-            summaryFiles.appendChild(item);
-        });
-
-        summaryPages.textContent = totalPages;
-        summaryType.textContent =
-            type === "bw" ? "⚫ B/W" : "🌈 Colour";
-        summaryCopies.textContent = copies;
-        summaryTotal.textContent = "₹" + total;
-
-        document.getElementById("uploadCard").style.display = "none";
-        summarySection.style.display = "block";
-
-        summarySection.scrollIntoView({
-            behavior: "smooth"
-        });
-
-    } catch (error) {
-        console.error(error);
-
-        alert(
-            "❌ Order save nahi hua.\n\n" +
-            "Please try again."
-        );
-    }
+    summarySection.scrollIntoView({
+        behavior: "smooth"
+    });
 });
 
 

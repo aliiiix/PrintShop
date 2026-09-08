@@ -156,35 +156,44 @@ function updateShopStatus() {
 
 
 // ==========================
-// FILE SELECT
-// ==========================
-
-// ==========================
-// FILE SELECT + PREVIEW
+// FILE SELECT + MULTIPLE FILES
 // ==========================
 
 fileInput.addEventListener("change", async function () {
 
-    selectedFiles = Array.from(this.files);
+    const newFiles = Array.from(this.files);
+
+    // PURANE FILES DELETE NAHI HONGE
+    selectedFiles = [...selectedFiles, ...newFiles];
+
+    // duplicate same file hatao
+    selectedFiles = selectedFiles.filter(
+        (file, index, arr) =>
+            index === arr.findIndex(
+                f =>
+                    f.name === file.name &&
+                    f.size === file.size &&
+                    f.lastModified === file.lastModified
+            )
+    );
 
     await showFiles();
 
     calculateTotal();
     updateShopStatus();
+
+    // input reset — next time same file bhi select ho sake
+    this.value = "";
 });
 
 
 // ==========================
-// SHOW FILES WITH THUMBNAIL
+// FILE LIST + THUMBNAIL
 // ==========================
 
 async function showFiles() {
 
     fileList.innerHTML = "";
-
-    if (selectedFiles.length === 0) {
-        return;
-    }
 
     for (let index = 0; index < selectedFiles.length; index++) {
 
@@ -201,22 +210,21 @@ async function showFiles() {
         item.style.display = "flex";
         item.style.alignItems = "center";
         item.style.gap = "10px";
-        item.style.padding = "8px 0";
-        item.style.borderBottom = "1px solid #eee";
+        item.style.marginTop = "8px";
 
-        // Thumbnail
+
+        // THUMBNAIL
         const thumb = document.createElement("div");
 
         thumb.style.width = "55px";
         thumb.style.height = "55px";
+        thumb.style.minWidth = "55px";
         thumb.style.borderRadius = "8px";
         thumb.style.overflow = "hidden";
-        thumb.style.flexShrink = "0";
         thumb.style.background = "#f1f1f1";
         thumb.style.display = "flex";
         thumb.style.alignItems = "center";
         thumb.style.justifyContent = "center";
-        thumb.style.fontSize = "28px";
 
         if (file.type.startsWith("image/")) {
 
@@ -233,10 +241,11 @@ async function showFiles() {
         } else {
 
             thumb.textContent = "📄";
+            thumb.style.fontSize = "28px";
         }
 
 
-        // File information
+        // FILE INFO
         const info = document.createElement("div");
 
         info.style.flex = "1";
@@ -246,52 +255,39 @@ async function showFiles() {
 
         name.textContent = file.name;
 
-        name.style.fontWeight = "500";
         name.style.whiteSpace = "nowrap";
         name.style.overflow = "hidden";
         name.style.textOverflow = "ellipsis";
 
-        const pageText = document.createElement("small");
+        const page = document.createElement("small");
 
-        pageText.textContent =
+        page.textContent =
             `${pages} page${pages > 1 ? "s" : ""}`;
 
-        pageText.style.color = "#666";
-
         info.appendChild(name);
-        info.appendChild(pageText);
+        info.appendChild(page);
 
 
-        // Remove button
-        const removeBtn = document.createElement("button");
+        // REMOVE BUTTON
+        const remove = document.createElement("button");
 
-        removeBtn.type = "button";
-        removeBtn.textContent = "✕";
+        remove.type = "button";
+        remove.textContent = "✕";
 
-        removeBtn.style.width = "32px";
-        removeBtn.style.height = "32px";
-        removeBtn.style.border = "none";
-        removeBtn.style.borderRadius = "50%";
-        removeBtn.style.background = "#eee";
-        removeBtn.style.color = "#d00";
-        removeBtn.style.fontSize = "16px";
-        removeBtn.style.fontWeight = "bold";
-        removeBtn.style.cursor = "pointer";
+        remove.style.width = "30px";
+        remove.style.height = "30px";
+        remove.style.border = "none";
+        remove.style.borderRadius = "50%";
+        remove.style.background = "#eee";
+        remove.style.color = "red";
+        remove.style.fontWeight = "bold";
 
-        removeBtn.onclick = function () {
+        remove.onclick = async function () {
 
             selectedFiles.splice(index, 1);
 
-            // Update actual file input
-            const dataTransfer = new DataTransfer();
+            await showFiles();
 
-            selectedFiles.forEach(file => {
-                dataTransfer.items.add(file);
-            });
-
-            fileInput.files = dataTransfer.files;
-
-            showFiles();
             calculateTotal();
             updateShopStatus();
         };
@@ -299,7 +295,7 @@ async function showFiles() {
 
         item.appendChild(thumb);
         item.appendChild(info);
-        item.appendChild(removeBtn);
+        item.appendChild(remove);
 
         fileList.appendChild(item);
     }

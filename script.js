@@ -93,37 +93,15 @@ async function loadSettings() {
 // ==========================
 
 function updatePrices() {
+    const bwLabel = document.getElementById("bwPriceLabel");
+    const colorLabel = document.getElementById("colorPriceLabel");
 
-    const bwRadio =
-        document.querySelector(
-            'input[name="printType"][value="bw"]'
-        );
-
-    const colorRadio =
-        document.querySelector(
-            'input[name="printType"][value="color"]'
-        );
-
-    if (bwRadio) {
-
-        const small =
-            bwRadio.closest("label")?.querySelector("small");
-
-        if (small) {
-            small.textContent =
-                `₹${prices.bw} / page`;
-        }
+    if (bwLabel) {
+        bwLabel.textContent = `₹${prices.bw} / page`;
     }
 
-    if (colorRadio) {
-
-        const small =
-            colorRadio.closest("label")?.querySelector("small");
-
-        if (small) {
-            small.textContent =
-                `₹${prices.color} / page`;
-        }
+    if (colorLabel) {
+        colorLabel.textContent = `₹${prices.color} / page`;
     }
 }
 

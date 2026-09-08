@@ -89,6 +89,122 @@ const orderSchema = new mongoose.Schema(
 
 const Order = mongoose.model("Order", orderSchema);
 
+/* ---------------- SHOP SETTINGS ---------------- */
+
+const settingsSchema = new mongoose.Schema(
+    {
+        shopOnline: {
+            type: Boolean,
+            default: true
+        },
+
+        bwPrice: {
+            type: Number,
+            default: 2
+        },
+
+        colorPrice: {
+            type: Number,
+            default: 10
+        }
+    },
+    {
+        timestamps: true
+    }
+);
+
+const ShopSettings =
+    mongoose.model("ShopSettings", settingsSchema);
+
+
+/* GET SHOP SETTINGS */
+
+app.get("/api/settings", async (req, res) => {
+    try {
+
+        let settings =
+            await ShopSettings.findOne();
+
+        if (!settings) {
+            settings =
+                await ShopSettings.create({});
+        }
+
+        res.json({
+            success: true,
+            settings
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Get settings error:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Could not get settings"
+        });
+    }
+});
+
+
+/* UPDATE SHOP SETTINGS */
+
+app.post("/api/settings", async (req, res) => {
+    try {
+
+        const {
+            shopOnline,
+            bwPrice,
+            colorPrice
+        } = req.body;
+
+        const settings =
+            await ShopSettings.findOneAndUpdate(
+                {},
+                {
+                    shopOnline:
+                        Boolean(shopOnline),
+
+                    bwPrice:
+                        Math.max(
+                            0,
+                            Number(bwPrice) || 0
+                        ),
+
+                    colorPrice:
+                        Math.max(
+                            0,
+                            Number(colorPrice) || 0
+                        )
+                },
+                {
+                    new: true,
+                    upsert: true
+                }
+            );
+
+        res.json({
+            success: true,
+            settings
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Update settings error:",
+            error
+        );
+
+        res.status(500).json({
+            success: false,
+            message: "Could not update settings"
+        });
+    }
+});
+
 /* ---------------- HEALTH ---------------- */
 
 app.get("/api/health", (req, res) => {

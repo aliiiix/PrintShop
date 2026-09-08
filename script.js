@@ -177,20 +177,151 @@ function updateShopStatus() {
 // FILE SELECT
 // ==========================
 
-fileInput.addEventListener(
-    "change",
-    async function () {
+// ==========================
+// FILE SELECT + PREVIEW
+// ==========================
 
-        selectedFiles =
-            Array.from(this.files);
+fileInput.addEventListener("change", async function () {
 
-        await showFiles();
+    selectedFiles = Array.from(this.files);
 
-        calculateTotal();
+    await showFiles();
 
-        updateShopStatus();
+    calculateTotal();
+    updateShopStatus();
+});
+
+
+// ==========================
+// SHOW FILES WITH THUMBNAIL
+// ==========================
+
+async function showFiles() {
+
+    fileList.innerHTML = "";
+
+    if (selectedFiles.length === 0) {
+        return;
     }
-);
+
+    for (let index = 0; index < selectedFiles.length; index++) {
+
+        const file = selectedFiles[index];
+
+        let pages = 1;
+
+        if (file.type === "application/pdf") {
+            pages = await getPDFPages(file);
+        }
+
+        const item = document.createElement("div");
+
+        item.style.display = "flex";
+        item.style.alignItems = "center";
+        item.style.gap = "10px";
+        item.style.padding = "8px 0";
+        item.style.borderBottom = "1px solid #eee";
+
+        // Thumbnail
+        const thumb = document.createElement("div");
+
+        thumb.style.width = "55px";
+        thumb.style.height = "55px";
+        thumb.style.borderRadius = "8px";
+        thumb.style.overflow = "hidden";
+        thumb.style.flexShrink = "0";
+        thumb.style.background = "#f1f1f1";
+        thumb.style.display = "flex";
+        thumb.style.alignItems = "center";
+        thumb.style.justifyContent = "center";
+        thumb.style.fontSize = "28px";
+
+        if (file.type.startsWith("image/")) {
+
+            const img = document.createElement("img");
+
+            img.src = URL.createObjectURL(file);
+
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.objectFit = "cover";
+
+            thumb.appendChild(img);
+
+        } else {
+
+            thumb.textContent = "📄";
+        }
+
+
+        // File information
+        const info = document.createElement("div");
+
+        info.style.flex = "1";
+        info.style.minWidth = "0";
+
+        const name = document.createElement("div");
+
+        name.textContent = file.name;
+
+        name.style.fontWeight = "500";
+        name.style.whiteSpace = "nowrap";
+        name.style.overflow = "hidden";
+        name.style.textOverflow = "ellipsis";
+
+        const pageText = document.createElement("small");
+
+        pageText.textContent =
+            `${pages} page${pages > 1 ? "s" : ""}`;
+
+        pageText.style.color = "#666";
+
+        info.appendChild(name);
+        info.appendChild(pageText);
+
+
+        // Remove button
+        const removeBtn = document.createElement("button");
+
+        removeBtn.type = "button";
+        removeBtn.textContent = "✕";
+
+        removeBtn.style.width = "32px";
+        removeBtn.style.height = "32px";
+        removeBtn.style.border = "none";
+        removeBtn.style.borderRadius = "50%";
+        removeBtn.style.background = "#eee";
+        removeBtn.style.color = "#d00";
+        removeBtn.style.fontSize = "16px";
+        removeBtn.style.fontWeight = "bold";
+        removeBtn.style.cursor = "pointer";
+
+        removeBtn.onclick = function () {
+
+            selectedFiles.splice(index, 1);
+
+            // Update actual file input
+            const dataTransfer = new DataTransfer();
+
+            selectedFiles.forEach(file => {
+                dataTransfer.items.add(file);
+            });
+
+            fileInput.files = dataTransfer.files;
+
+            showFiles();
+            calculateTotal();
+            updateShopStatus();
+        };
+
+
+        item.appendChild(thumb);
+        item.appendChild(info);
+        item.appendChild(removeBtn);
+
+        fileList.appendChild(item);
+    }
+}
 
 
 // ==========================

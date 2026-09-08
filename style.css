@@ -47,8 +47,8 @@ h1 {
 
 .upload-card h2,
 .print-card h2 {
-    font-size: 28px;
-    margin-bottom: 18px;
+    font-size: 42px;
+    margin-bottom: 8px;
 }
 
 .upload-box {
@@ -58,16 +58,16 @@ h1 {
     justify-content: center;
     width: 100%;
     min-height: 330px;
-    border: 4px dashed #aaa;
-    border-radius: 25px;
+    border: 2px dashed #aaa;
+    border-radius: 14px;
     background: #fff;
     cursor: pointer;
     text-align: center;
 }
 
 .upload-icon {
-    font-size: 80px;
-    margin-bottom: 20px;
+    font-size: 20px;
+    margin-bottom: 6px;
 }
 
 .upload-title {

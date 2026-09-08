@@ -14,7 +14,6 @@ const summaryCopies = document.getElementById("summaryCopies");
 const summaryTotal = document.getElementById("summaryTotal");
 
 const orderId = document.getElementById("orderId");
-
 const payBtn = document.getElementById("payBtn");
 const backBtn = document.getElementById("backBtn");
 
@@ -35,9 +34,7 @@ fileInput.addEventListener("change", async function () {
 
     const newFiles = Array.from(this.files);
 
-    if (newFiles.length === 0) {
-        return;
-    }
+    if (newFiles.length === 0) return;
 
     const allowed = [
         "application/pdf",
@@ -56,21 +53,14 @@ fileInput.addEventListener("change", async function () {
         return;
     }
 
-
-    // Add new files
     selectedFiles = [...selectedFiles, ...newFiles];
 
-
-    // Clear input so same file can be selected again
     fileInput.value = "";
-
 
     fileInfo.textContent = "⏳ Reading files...";
 
     totalPages = 0;
 
-
-    // Calculate total pages
     for (const file of selectedFiles) {
 
         if (file.type === "application/pdf") {
@@ -81,12 +71,9 @@ fileInput.addEventListener("change", async function () {
 
     }
 
-
-    // Update information
     fileInfo.innerHTML =
         `📁 <b>${selectedFiles.length} file${selectedFiles.length > 1 ? "s" : ""} selected</b><br>
          📄 <b>${totalPages} total pages</b>`;
-
 
     renderPreview();
 
@@ -128,7 +115,6 @@ function renderPreview() {
 
     filePreview.innerHTML = "";
 
-
     selectedFiles.forEach((file, index) => {
 
         const item = document.createElement("div");
@@ -136,7 +122,6 @@ function renderPreview() {
         item.className = "preview-item";
 
 
-        // Image thumbnail
         if (file.type.startsWith("image/")) {
 
             const img = document.createElement("img");
@@ -147,10 +132,7 @@ function renderPreview() {
 
             item.appendChild(img);
 
-        }
-
-        // PDF icon
-        else {
+        } else {
 
             const icon = document.createElement("div");
 
@@ -163,7 +145,6 @@ function renderPreview() {
         }
 
 
-        // File name
         const name = document.createElement("div");
 
         name.className = "preview-name";
@@ -173,7 +154,6 @@ function renderPreview() {
         item.appendChild(name);
 
 
-        // Remove button
         const removeBtn = document.createElement("button");
 
         removeBtn.className = "remove-file";
@@ -187,8 +167,6 @@ function renderPreview() {
 
             selectedFiles.splice(index, 1);
 
-
-            // Recalculate pages
             totalPages = 0;
 
             for (const file of selectedFiles) {
@@ -217,7 +195,6 @@ function renderPreview() {
                 renderPreview();
 
             }
-
 
             calculatePrice();
 
@@ -257,16 +234,19 @@ copiesInput.addEventListener(
 
 
 // ===============================
-// PRICE CALCULATION
+// PRICE
 // ===============================
 
 function calculatePrice() {
 
-    const type =
+    const selectedType =
         document.querySelector(
             'input[name="printType"]:checked'
-        ).value;
+        );
 
+    const type = selectedType
+        ? selectedType.value
+        : "bw";
 
     const copies =
         Math.max(
@@ -274,12 +254,10 @@ function calculatePrice() {
             Number(copiesInput.value) || 1
         );
 
-
     const total =
         totalPages *
         copies *
         prices[type];
-
 
     totalPrice.textContent =
         "₹" + total;
@@ -288,7 +266,7 @@ function calculatePrice() {
 
 
 // ===============================
-// ORDER ID GENERATOR
+// ORDER ID
 // ===============================
 
 function generateOrderId() {
@@ -298,17 +276,16 @@ function generateOrderId() {
 
     let id = "PS-";
 
-
     for (let i = 0; i < 6; i++) {
 
         id += characters.charAt(
             Math.floor(
-                Math.random() * characters.length
+                Math.random() *
+                characters.length
             )
         );
 
     }
-
 
     return id;
 
@@ -316,55 +293,104 @@ function generateOrderId() {
 
 
 // ===============================
-// CONTINUE → ORDER SUMMARY
+// CONTINUE → SUMMARY
 // ===============================
 
-orderBtn.addEventListener("click", function () {
-    if (selectedFiles.length === 0) {
-        alert("Please select files first.");
-        return;
+orderBtn.addEventListener(
+    "click",
+    function () {
+
+        if (selectedFiles.length === 0) {
+
+            alert("Please select files first.");
+
+            return;
+
+        }
+
+
+        const type =
+            document.querySelector(
+                'input[name="printType"]:checked'
+            ).value;
+
+        const copies =
+            Math.max(
+                1,
+                Number(copiesInput.value) || 1
+            );
+
+        const total =
+            totalPages *
+            copies *
+            prices[type];
+
+
+        orderId.textContent =
+            generateOrderId();
+
+
+        summaryFiles.innerHTML = "";
+
+
+        selectedFiles.forEach(
+            (file, index) => {
+
+                const item =
+                    document.createElement("div");
+
+                item.style.padding = "10px";
+
+                item.style.marginBottom = "8px";
+
+                item.style.background = "#f5f5f5";
+
+                item.style.borderRadius = "10px";
+
+                item.style.fontSize = "14px";
+
+                item.textContent =
+                    `📄 ${index + 1}. ${file.name}`;
+
+                summaryFiles.appendChild(item);
+
+            }
+        );
+
+
+        summaryPages.textContent =
+            totalPages;
+
+        summaryType.textContent =
+            type === "bw"
+                ? "⚫ B/W"
+                : "🌈 Colour";
+
+        summaryCopies.textContent =
+            copies;
+
+        summaryTotal.textContent =
+            "₹" + total;
+
+
+        document
+            .getElementById("uploadCard")
+            .style.display = "none";
+
+        summarySection.style.display =
+            "block";
+
+
+        summarySection.scrollIntoView({
+            behavior: "smooth"
+        });
+
     }
-
-    const type = document.querySelector('input[name="printType"]:checked').value;
-    const copies = Math.max(1, Number(copiesInput.value) || 1);
-    const total = totalPages * copies * prices[type];
-
-    orderId.textContent = generateOrderId();
-
-    summaryFiles.innerHTML = "";
-
-    selectedFiles.forEach((file, index) => {
-        const item = document.createElement("div");
-
-        item.style.padding = "10px";
-        item.style.marginBottom = "8px";
-        item.style.background = "#f5f5f5";
-        item.style.borderRadius = "10px";
-        item.style.fontSize = "14px";
-
-        item.textContent = `📄 ${index + 1}. ${file.name}`;
-
-        summaryFiles.appendChild(item);
-    });
-
-    summaryPages.textContent = totalPages;
-    summaryType.textContent =
-        type === "bw" ? "⚫ B/W" : "🌈 Colour";
-    summaryCopies.textContent = copies;
-    summaryTotal.textContent = "₹" + total;
-
-    document.getElementById("uploadCard").style.display = "none";
-    summarySection.style.display = "block";
-
-    summarySection.scrollIntoView({
-        behavior: "smooth"
-    });
-});
-
+);
 
 
 // ===============================
-// ← EDIT ORDER
+// EDIT ORDER
 // ===============================
 
 backBtn.addEventListener(
@@ -374,11 +400,9 @@ backBtn.addEventListener(
         summarySection.style.display =
             "none";
 
-
         document
             .getElementById("uploadCard")
             .style.display = "block";
-
 
         window.scrollTo({
             top: 0,
@@ -390,7 +414,7 @@ backBtn.addEventListener(
 
 
 // ===============================
-// CONFIRM & PAY
+// ONLINE PAYMENT PLACEHOLDER
 // ===============================
 
 payBtn.addEventListener(
@@ -408,69 +432,3 @@ payBtn.addEventListener(
 
     }
 );
-const cashBtn = document.getElementById("cashBtn");
-
-cashBtn.addEventListener("click", async function () {
-    const type = document.querySelector('input[name="printType"]:checked').value;
-    const copies = Math.max(1, Number(copiesInput.value) || 1);
-    const total = totalPages * copies * prices[type];
-
-    const currentOrderId = orderId.textContent;
-
-    try {
-        const response = await fetch(
-            "https://printshop-q8id.onrender.com/api/orders",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    orderId: currentOrderId,
-                    files: selectedFiles.map(file => ({
-                        name: file.name,
-                        pages: file.type === "application/pdf" ? 0 : 1
-                    })),
-                    printType: type,
-                    copies: copies,
-                    totalPages: totalPages,
-                    totalAmount: total,
-                    status: "CASH_PENDING"
-                })
-            }
-        );
-
-        const data = await response.json();
-
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || "Order failed");
-        }
-
-        alert(
-            "✅ Order placed successfully!\n\n" +
-            "Order ID: " + currentOrderId + "\n" +
-            "Amount: ₹" + total + "\n\n" +
-            "💵 Pay at the shop when you collect your prints."
-        );
-
-    } catch (error) {
-        console.error(error);
-        alert("❌ Order save nahi hua. Please try again.");
-
-        payBtn.addEventListener(
-    "click",
-    function () {
-
-        alert(
-            "Payment system coming next! 💳\n\n" +
-            "Order ID: " +
-            orderId.textContent +
-            "\n" +
-            "Total: " +
-            summaryTotal.textContent
-        );
-
-    }
-);
-    }
-});

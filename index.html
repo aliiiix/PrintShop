@@ -21,98 +21,88 @@
          Online
         </div>
 
-        <!-- UPLOAD -->
-    <section class="card upload-card">
-    <h2>Upload File</h2>
-
-    <label for="fileInput" class="upload-box">
-        <div class="upload-icon">📄</div>
-        <div class="upload-title">Upload File</div>
-        <div class="upload-subtitle">Tap here to select your File</div>
-    </label>
-
-    <input
-        type="file"
-        id="fileInput"
-        accept=".pdf,.jpg,.jpeg,.png,.webp"
-        multiple
-        hidden
-    >
-
-    <div id="fileList"></div>
-    </section>
-
-        <!-- PRINT TYPE -->
-    <section class="card print-card">
-    <h2>Print Type</h2>
-
-    <div class="print-options">
-
-        <label class="print-option selected">
-            <input
-                type="radio"
-                name="printType"
-                value="bw"
-                checked
-            >
-
-            <div class="print-content">
-                <div class="print-name">
-                    <span class="black-circle">●</span>
-                    B/W
-                </div>
-
-                <div class="print-price" id="bwPriceLabel">
-                    ₹ / page
-                </div>
-            </div>
-        </label>
-
-
-        <label class="print-option">
-            <input
-                type="radio"
-                name="printType"
-                value="color"
-            >
-
-            <div class="print-content">
-                <div class="print-name">
-                    🌈 Colour
-                </div>
-
-                <div class="print-price" id="colorPriceLabel">
-                    ₹ / page
-                </div>
-            </div>
-        </label>
-
-    </div>
-</section>
-
-        <!-- COPIES -->
-        <section class="card">
-            <h2>Copies</h2>
-
-            <input
-                type="number"
-                id="copies"
-                min="1"
-                value="1"
-            >
-        </section>
-
-        <!-- TOTAL -->
-        <section class="card total-card">
-
-            <div>
-                <span>Total Pages</span>
-                <strong id="totalPages">0</strong>
+        <!-- MAIN SINGLE CARD (Merged All Input Sections) -->
+        <section class="card main-form-card">
+            
+            <!-- UPLOAD SECTION -->
+            <div class="card-section">
+                <h2>Upload File</h2>
+                <label for="fileInput" class="upload-box">
+                    <div class="upload-icon">📄</div>
+                    <div class="upload-title">Upload File</div>
+                    <div class="upload-subtitle">Tap here to select your File</div>
+                </label>
+                <input
+                    type="file"
+                    id="fileInput"
+                    accept=".pdf,.jpg,.jpeg,.png,.webp"
+                    multiple
+                    hidden
+                >
+                <div id="fileList"></div>
             </div>
 
-            <div>
-                <span>Total Amount</span>
-                <strong id="totalAmount">₹0</strong>
+            <!-- PRINT TYPE SECTION -->
+            <div class="card-section">
+                <h2>Print Type</h2>
+                <div class="print-options">
+                    <label class="print-option selected">
+                        <input
+                            type="radio"
+                            name="printType"
+                            value="bw"
+                            checked
+                        >
+                        <div class="print-content">
+                            <div class="print-name">
+                                <span class="black-circle">●</span>
+                                B/W
+                            </div>
+                            <div class="print-price" id="bwPriceLabel">
+                                ₹ / page
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="print-option">
+                        <input
+                            type="radio"
+                            name="printType"
+                            value="color"
+                        >
+                        <div class="print-content">
+                            <div class="print-name">
+                                🌈 Colour
+                            </div>
+                            <div class="print-price" id="colorPriceLabel">
+                                ₹ / page
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- COPIES SECTION -->
+            <div class="card-section">
+                <h2>Copies</h2>
+                <input
+                    type="number"
+                    id="copies"
+                    min="1"
+                    value="1"
+                >
+            </div>
+
+            <!-- TOTAL SECTION -->
+            <div class="card-section total-card">
+                <div>
+                    <span>Total Pages</span>
+                    <strong id="totalPages">0</strong>
+                </div>
+                <div>
+                    <span>Total Amount</span>
+                    <strong id="totalAmount">₹0</strong>
+                </div>
             </div>
 
         </section>
@@ -174,22 +164,17 @@
             </div>
 
             <button id="editBtn" class="edit-btn">
-                ✏️ Edit Order
+                 ← Edit Order
             </button>
 
         </section>
 
-    
-        </div>
+        <!-- FOOTER -->
+        <p class="footer">
+            Fast • Simple • No Queue
+        </p>
 
-
-           <!-- FOOTER -->
-
-             <p class="footer">
-                     Fast • Simple • No Queue
-                 </p>
-
-        </div>
+    </div>
 
     <script src="script.js?v=4"></script>
 

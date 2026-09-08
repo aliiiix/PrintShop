@@ -6,20 +6,13 @@ require("dotenv").config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-/* ---------------- MIDDLEWARE ---------------- */
+app.use(express.json({ limit: "10mb" }));
 
-app.use(express.json());
-
+// CORS
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
-    res.header(
-        "Access-Control-Allow-Methods",
-        "GET, POST, PUT, DELETE, OPTIONS"
-    );
-    res.header(
-        "Access-Control-Allow-Headers",
-        "Content-Type"
-    );
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type");
 
     if (req.method === "OPTIONS") {
         return res.sendStatus(200);
@@ -30,104 +23,104 @@ app.use((req, res, next) => {
 
 app.use(express.static(__dirname));
 
-/* ---------------- ORDER MODEL ---------------- */
 
-const orderSchema = new mongoose.Schema(
-    {
-        orderId: {
-            type: String,
-            required: true,
-            unique: true
-        },
+// =========================
+// ORDER MODEL
+// =========================
 
-        files: [
-            {
-                name: String,
-                pages: Number
-            }
-        ],
-
-        printType: {
-            type: String,
-            enum: ["bw", "color"],
-            required: true
-        },
-
-        copies: {
-            type: Number,
-            required: true
-        },
-
-        totalPages: {
-            type: Number,
-            required: true
-        },
-
-        totalAmount: {
-            type: Number,
-            required: true
-        },
-
-        status: {
-            type: String,
-            enum: [
-                "CASH_PENDING",
-                "PENDING_PAYMENT",
-                "PAID",
-                "ACCEPTED",
-                "PRINTING",
-                "COMPLETED",
-                "REJECTED"
-            ],
-            default: "PENDING_PAYMENT"
-        }
+const orderSchema = new mongoose.Schema({
+    orderId: {
+        type: String,
+        required: true,
+        unique: true
     },
-    {
-        timestamps: true
+
+    files: [{
+        name: String,
+        pages: Number
+    }],
+
+    printType: {
+        type: String,
+        enum: ["bw", "color"],
+        required: true
+    },
+
+    copies: {
+        type: Number,
+        required: true
+    },
+
+    totalPages: {
+        type: Number,
+        required: true
+    },
+
+    totalAmount: {
+        type: Number,
+        required: true
+    },
+
+    status: {
+        type: String,
+        enum: [
+            "CASH_PENDING",
+            "PENDING_PAYMENT",
+            "PAID",
+            "ACCEPTED",
+            "PRINTING",
+            "COMPLETED",
+            "REJECTED"
+        ],
+        default: "PENDING_PAYMENT"
     }
-);
+}, {
+    timestamps: true
+});
 
 const Order = mongoose.model("Order", orderSchema);
 
-/* ---------------- SHOP SETTINGS ---------------- */
 
-const settingsSchema = new mongoose.Schema(
-    {
-        shopOnline: {
-            type: Boolean,
-            default: true
-        },
+// =========================
+// SHOP SETTINGS MODEL
+// =========================
 
-        bwPrice: {
-            type: Number,
-            default: 2
-        },
-
-        colorPrice: {
-            type: Number,
-            default: 10
-        }
+const settingsSchema = new mongoose.Schema({
+    shopOnline: {
+        type: Boolean,
+        default: true
     },
-    {
-        timestamps: true
+
+    bwPrice: {
+        type: Number,
+        default: 2
+    },
+
+    colorPrice: {
+        type: Number,
+        default: 10
     }
-);
+}, {
+    timestamps: true
+});
 
-const ShopSettings =
-    mongoose.model("ShopSettings", settingsSchema);
+const ShopSettings = mongoose.model("ShopSettings", settingsSchema);
 
 
-/* GET SHOP SETTINGS */
+// =========================
+// GET SETTINGS
+// =========================
 
 app.get("/api/settings", async (req, res) => {
     try {
-
-        let settings =
-            await ShopSettings.findOne();
+        let settings = await ShopSettings.findOne();
 
         if (!settings) {
-            settings =
-                await ShopSettings.create({});
+            settings = await ShopSettings.create({
+                shopOnline: true,
+                bwPrice: 2,
+                colorPrice: 10
+            });
         }
 
         res.json({
@@ -136,11 +129,7 @@ app.get("/api/settings", async (req, res) => {
         });
 
     } catch (error) {
-
-        console.error(
-            "Get settings error:",
-            error
-        );
+        console.error("Get settings error:", error);
 
         res.status(500).json({
             success: false,
@@ -150,41 +139,36 @@ app.get("/api/settings", async (req, res) => {
 });
 
 
-/* UPDATE SHOP SETTINGS */
+// =========================
+// UPDATE SETTINGS
+// =========================
 
 app.post("/api/settings", async (req, res) => {
     try {
+        const bwPrice = Math.max(
+            0,
+            Number(req.body.bwPrice) || 0
+        );
 
-        const {
-            shopOnline,
-            bwPrice,
-            colorPrice
-        } = req.body;
+        const colorPrice = Math.max(
+            0,
+            Number(req.body.colorPrice) || 0
+        );
 
-        const settings =
-            await ShopSettings.findOneAndUpdate(
-                {},
-                {
-                    shopOnline:
-                        Boolean(shopOnline),
+        const shopOnline = Boolean(req.body.shopOnline);
 
-                    bwPrice:
-                        Math.max(
-                            0,
-                            Number(bwPrice) || 0
-                        ),
-
-                    colorPrice:
-                        Math.max(
-                            0,
-                            Number(colorPrice) || 0
-                        )
-                },
-                {
-                    new: true,
-                    upsert: true
-                }
-            );
+        const settings = await ShopSettings.findOneAndUpdate(
+            {},
+            {
+                shopOnline,
+                bwPrice,
+                colorPrice
+            },
+            {
+                new: true,
+                upsert: true
+            }
+        );
 
         res.json({
             success: true,
@@ -192,11 +176,7 @@ app.post("/api/settings", async (req, res) => {
         });
 
     } catch (error) {
-
-        console.error(
-            "Update settings error:",
-            error
-        );
+        console.error("Update settings error:", error);
 
         res.status(500).json({
             success: false,
@@ -205,7 +185,10 @@ app.post("/api/settings", async (req, res) => {
     }
 });
 
-/* ---------------- HEALTH ---------------- */
+
+// =========================
+// HEALTH
+// =========================
 
 app.get("/api/health", (req, res) => {
     res.json({
@@ -214,10 +197,23 @@ app.get("/api/health", (req, res) => {
     });
 });
 
-/* ---------------- CREATE ORDER ---------------- */
+
+// =========================
+// CREATE ORDER
+// =========================
 
 app.post("/api/orders", async (req, res) => {
     try {
+        const settings = await ShopSettings.findOne();
+
+        // If shop is offline, don't accept new orders
+        if (settings && !settings.shopOnline) {
+            return res.status(403).json({
+                success: false,
+                message: "Shop is currently offline"
+            });
+        }
+
         const order = await Order.create(req.body);
 
         res.status(201).json({
@@ -235,7 +231,10 @@ app.post("/api/orders", async (req, res) => {
     }
 });
 
-/* ---------------- GET ORDERS ---------------- */
+
+// =========================
+// GET ALL ORDERS
+// =========================
 
 app.get("/api/orders", async (req, res) => {
     try {
@@ -259,7 +258,43 @@ app.get("/api/orders", async (req, res) => {
     }
 });
 
-/* ---------------- UPDATE ORDER STATUS ---------------- */
+
+// =========================
+// GET SINGLE ORDER
+// =========================
+
+app.get("/api/orders/:orderId", async (req, res) => {
+    try {
+        const order = await Order.findOne({
+            orderId: req.params.orderId
+        });
+
+        if (!order) {
+            return res.status(404).json({
+                success: false,
+                message: "Order not found"
+            });
+        }
+
+        res.json({
+            success: true,
+            order
+        });
+
+    } catch (error) {
+        console.error("Get single order error:", error);
+
+        res.status(500).json({
+            success: false,
+            message: "Could not get order"
+        });
+    }
+});
+
+
+// =========================
+// UPDATE ORDER STATUS
+// =========================
 
 app.post("/api/orders/:orderId/status", async (req, res) => {
     try {
@@ -283,9 +318,15 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
         }
 
         const order = await Order.findOneAndUpdate(
-            { orderId: req.params.orderId },
-            { status: status },
-            { new: true }
+            {
+                orderId: req.params.orderId
+            },
+            {
+                status
+            },
+            {
+                new: true
+            }
         );
 
         if (!order) {
@@ -310,17 +351,22 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
     }
 });
 
-/* ---------------- FRONTEND ---------------- */
+
+// =========================
+// HOME
+// =========================
 
 app.get("/", (req, res) => {
     res.sendFile(path.join(__dirname, "index.html"));
 });
 
-/* ---------------- START SERVER ---------------- */
+
+// =========================
+// START SERVER
+// =========================
 
 async function startServer() {
     try {
-
         await mongoose.connect(process.env.MONGO_URI);
 
         console.log("MongoDB connected ✅");
@@ -332,7 +378,6 @@ async function startServer() {
         });
 
     } catch (error) {
-
         console.error(
             "MongoDB connection failed ❌",
             error

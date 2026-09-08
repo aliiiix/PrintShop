@@ -5,43 +5,70 @@ const prices = {
     color: 10
 };
 
-let selectedFiles = [];
 let shopOnline = true;
+let selectedFiles = [];
 let currentOrderId = null;
 let statusTimer = null;
 
 
-// ===============================
+// ==========================
 // ELEMENTS
-// ===============================
+// ==========================
 
 const fileInput = document.getElementById("fileInput");
 const fileList = document.getElementById("fileList");
-
 const copiesInput = document.getElementById("copies");
 
 const orderBtn = document.getElementById("orderBtn");
-const cashBtn = document.getElementById("cashBtn");
-const payBtn = document.getElementById("payBtn");
-const editBtn = document.getElementById("editBtn");
-
 const summary = document.getElementById("summary");
 
 const totalPagesEl = document.getElementById("totalPages");
 const totalAmountEl = document.getElementById("totalAmount");
 
-const bwPriceLabel = document.getElementById("bwPriceLabel");
-const colorPriceLabel = document.getElementById("colorPriceLabel");
-
-const shopStatus = document.getElementById("shopStatus");
-const orderStatusBox = document.getElementById("orderStatusBox");
+const cashBtn = document.getElementById("cashBtn");
+const payBtn = document.getElementById("payBtn");
+const editBtn = document.getElementById("editBtn");
 
 
-// ===============================
-// LOAD SHOP SETTINGS
-// ===============================
+// ==========================
+// SHOP STATUS
+// ==========================
 
-async function loadShopSettings() {
+const statusBox = document.createElement("div");
+
+statusBox.style.textAlign = "center";
+statusBox.style.fontWeight = "500";
+statusBox.style.margin = "0 0 8px 0";
+
+document.querySelector(".container").insertBefore(
+    statusBox,
+    document.querySelector(".container").children[1]
+);
+
+
+// ==========================
+// ORDER STATUS
+// ==========================
+
+const orderStatus = document.createElement("div");
+
+orderStatus.style.textAlign = "center";
+orderStatus.style.margin = "10px 0";
+orderStatus.style.fontWeight = "500";
+
+if (summary) {
+    summary.insertBefore(
+        orderStatus,
+        summary.firstChild
+    );
+}
+
+
+// ==========================
+// LOAD SETTINGS
+// ==========================
+
+async function loadSettings() {
 
     try {
 
@@ -58,7 +85,7 @@ async function loadShopSettings() {
 
         shopOnline = Boolean(data.settings.shopOnline);
 
-        updatePriceLabels();
+        updatePrices();
         updateShopStatus();
         calculateTotal();
 
@@ -70,70 +97,107 @@ async function loadShopSettings() {
 }
 
 
-// ===============================
-// PRICE LABELS
-// ===============================
+// ==========================
+// UPDATE PRICE ON WEBSITE
+// ==========================
 
-function updatePriceLabels() {
+function updatePrices() {
 
-    bwPriceLabel.textContent =
-        `₹${prices.bw} / page`;
+    const bwRadio =
+        document.querySelector(
+            'input[name="printType"][value="bw"]'
+        );
 
-    colorPriceLabel.textContent =
-        `₹${prices.color} / page`;
+    const colorRadio =
+        document.querySelector(
+            'input[name="printType"][value="color"]'
+        );
+
+    if (bwRadio) {
+
+        const small =
+            bwRadio.closest("label")?.querySelector("small");
+
+        if (small) {
+            small.textContent =
+                `₹${prices.bw} / page`;
+        }
+    }
+
+    if (colorRadio) {
+
+        const small =
+            colorRadio.closest("label")?.querySelector("small");
+
+        if (small) {
+            small.textContent =
+                `₹${prices.color} / page`;
+        }
+    }
 }
 
 
-// ===============================
-// SHOP STATUS
-// ===============================
+// ==========================
+// SHOP ONLINE / OFFLINE
+// ==========================
 
 function updateShopStatus() {
 
     if (shopOnline) {
 
-        shopStatus.textContent = " Online";
-        shopStatus.className = "shop-status online";
+        statusBox.textContent =
+            "🟢 Shop Online";
 
-        fileInput.disabled = false;
-        orderBtn.disabled = selectedFiles.length === 0;
+        statusBox.style.color = "green";
+
+        if (fileInput)
+            fileInput.disabled = false;
+
+        if (orderBtn)
+            orderBtn.disabled =
+                selectedFiles.length === 0;
 
     } else {
 
-        shopStatus.textContent = " Offline";
-        shopStatus.className = "shop-status offline";
+        statusBox.textContent =
+            "🔴 Shop Offline";
 
-        fileInput.disabled = true;
-        orderBtn.disabled = true;
+        statusBox.style.color = "red";
 
-        cashBtn.disabled = true;
-        payBtn.disabled = true;
+        if (fileInput)
+            fileInput.disabled = true;
+
+        if (orderBtn)
+            orderBtn.disabled = true;
     }
 }
 
 
-// ===============================
+// ==========================
 // FILE SELECT
-// ===============================
+// ==========================
 
-fileInput.addEventListener("change", async function () {
+fileInput.addEventListener(
+    "change",
+    async function () {
 
-    selectedFiles = Array.from(this.files);
+        selectedFiles =
+            Array.from(this.files);
 
-    await renderFiles();
+        await showFiles();
 
-    calculateTotal();
+        calculateTotal();
 
-    updateShopStatus();
+        updateShopStatus();
+    }
+);
 
-});
 
-
-// ===============================
+// ==========================
 // SHOW FILES
-// ===============================
+// ==========================
 
-async function renderFiles() {
+async function showFiles() {
 
     fileList.innerHTML = "";
 
@@ -141,61 +205,63 @@ async function renderFiles() {
 
         let pages = 1;
 
-        if (file.type === "application/pdf") {
-
-            pages = await getPDFPages(file);
-
+        if (
+            file.type ===
+            "application/pdf"
+        ) {
+            pages =
+                await getPDFPages(file);
         }
 
-        const div = document.createElement("div");
+        const div =
+            document.createElement("div");
 
-        div.className = "file-item";
-
-        div.innerHTML = `
-            <span>${escapeHTML(file.name)}</span>
-            <span>${pages} page${pages > 1 ? "s" : ""}</span>
-        `;
+        div.textContent =
+            `${file.name} — ${pages} page${pages > 1 ? "s" : ""}`;
 
         fileList.appendChild(div);
     }
 }
 
 
-// ===============================
+// ==========================
 // PDF PAGE COUNT
-// ===============================
+// ==========================
 
 function getPDFPages(file) {
 
     return new Promise((resolve) => {
 
-        const reader = new FileReader();
+        const reader =
+            new FileReader();
 
         reader.onload = function () {
 
-            const text = new TextDecoder(
-                "latin1"
-            ).decode(reader.result);
+            const text =
+                new TextDecoder("latin1")
+                    .decode(reader.result);
 
-            const matches = text.match(/\/Type\s*\/Page\b/g);
+            const matches =
+                text.match(
+                    /\/Type\s*\/Page\b/g
+                );
 
             resolve(
-                matches && matches.length
-                    ? matches.length
-                    : 1
+                matches?.length || 1
             );
         };
 
-        reader.onerror = () => resolve(1);
+        reader.onerror =
+            () => resolve(1);
 
         reader.readAsArrayBuffer(file);
     });
 }
 
 
-// ===============================
-// TOTAL CALCULATION
-// ===============================
+// ==========================
+// CALCULATE TOTAL
+// ==========================
 
 async function calculateTotal() {
 
@@ -203,26 +269,27 @@ async function calculateTotal() {
 
     for (const file of selectedFiles) {
 
-        if (file.type === "application/pdf") {
-
-            pages += await getPDFPages(file);
-
+        if (
+            file.type ===
+            "application/pdf"
+        ) {
+            pages +=
+                await getPDFPages(file);
         } else {
-
             pages += 1;
-
         }
     }
 
-    const copies = Math.max(
-        1,
-        Number(copiesInput.value) || 1
-    );
+    const copies =
+        Math.max(
+            1,
+            Number(copiesInput.value) || 1
+        );
 
     const type =
         document.querySelector(
             'input[name="printType"]:checked'
-        ).value;
+        )?.value || "bw";
 
     const price =
         type === "color"
@@ -232,11 +299,13 @@ async function calculateTotal() {
     const total =
         pages * copies * price;
 
-    totalPagesEl.textContent =
-        pages * copies;
+    if (totalPagesEl)
+        totalPagesEl.textContent =
+            pages * copies;
 
-    totalAmountEl.textContent =
-        `₹${total}`;
+    if (totalAmountEl)
+        totalAmountEl.textContent =
+            `₹${total}`;
 
     return {
         pages,
@@ -247,12 +316,14 @@ async function calculateTotal() {
 }
 
 
-// ===============================
-// PRICE CHANGE
-// ===============================
+// ==========================
+// PRINT TYPE CHANGE
+// ==========================
 
 document
-    .querySelectorAll('input[name="printType"]')
+    .querySelectorAll(
+        'input[name="printType"]'
+    )
     .forEach((radio) => {
 
         radio.addEventListener(
@@ -262,15 +333,20 @@ document
 
     });
 
+
+// ==========================
+// COPIES CHANGE
+// ==========================
+
 copiesInput.addEventListener(
     "input",
     calculateTotal
 );
 
 
-// ===============================
+// ==========================
 // CONTINUE
-// ===============================
+// ==========================
 
 orderBtn.addEventListener(
     "click",
@@ -287,7 +363,9 @@ orderBtn.addEventListener(
 
         if (selectedFiles.length === 0) {
 
-            alert("Please select a file.");
+            alert(
+                "Please select a file."
+            );
 
             return;
         }
@@ -295,21 +373,22 @@ orderBtn.addEventListener(
         const data =
             await calculateTotal();
 
-        const orderId =
+        currentOrderId =
             "PS-" +
-            Date.now().toString(36).toUpperCase();
-
-        currentOrderId = orderId;
+            Date.now()
+                .toString(36)
+                .toUpperCase();
 
         document.getElementById(
             "orderId"
-        ).textContent = orderId;
+        ).textContent =
+            currentOrderId;
 
         document.getElementById(
             "summaryFiles"
         ).textContent =
             selectedFiles
-                .map(file => file.name)
+                .map(f => f.name)
                 .join(", ");
 
         document.getElementById(
@@ -334,17 +413,14 @@ orderBtn.addEventListener(
         ).textContent =
             data.total;
 
-        orderStatusBox.textContent =
-            "🟡 Order Ready — choose payment";
+        orderStatus.textContent =
+            "🟡 Order Pending";
 
         summary.classList.remove(
             "hidden"
         );
 
         orderBtn.disabled = true;
-
-        cashBtn.disabled = false;
-        payBtn.disabled = false;
 
         summary.scrollIntoView({
             behavior: "smooth"
@@ -353,9 +429,9 @@ orderBtn.addEventListener(
 );
 
 
-// ===============================
+// ==========================
 // CASH ORDER
-// ===============================
+// ==========================
 
 cashBtn.addEventListener(
     "click",
@@ -377,39 +453,49 @@ cashBtn.addEventListener(
 
         try {
 
-            const response = await fetch(
-                API_BASE + "/api/orders",
-                {
-                    method: "POST",
+            const response =
+                await fetch(
+                    API_BASE +
+                    "/api/orders",
+                    {
+                        method: "POST",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
 
-                    body: JSON.stringify({
+                        body: JSON.stringify({
 
-                        orderId: currentOrderId,
+                            orderId:
+                                currentOrderId,
 
-                        files: selectedFiles.map(
-                            file => ({
-                                name: file.name,
-                                pages: 1
-                            })
-                        ),
+                            files:
+                                selectedFiles.map(
+                                    file => ({
+                                        name:
+                                            file.name,
+                                        pages: 1
+                                    })
+                                ),
 
-                        printType: data.type,
+                            printType:
+                                data.type,
 
-                        copies: data.copies,
+                            copies:
+                                data.copies,
 
-                        totalPages: data.pages,
+                            totalPages:
+                                data.pages,
 
-                        totalAmount: data.total,
+                            totalAmount:
+                                data.total,
 
-                        status: "CASH_PENDING"
-                    })
-                }
-            );
+                            status:
+                                "CASH_PENDING"
+                        })
+                    }
+                );
 
             const result =
                 await response.json();
@@ -422,15 +508,15 @@ cashBtn.addEventListener(
                 );
             }
 
-            orderStatusBox.textContent =
-                "🟡 Cash Pending — Show this Order ID at the shop";
-
             localStorage.setItem(
                 "printshop_order_id",
                 currentOrderId
             );
 
-            startOrderStatus();
+            orderStatus.textContent =
+                "🟡 Cash Pending — Show Order ID at shop";
+
+            startStatusChecking();
 
         } catch (error) {
 
@@ -445,9 +531,9 @@ cashBtn.addEventListener(
 );
 
 
-// ===============================
-// ONLINE PAYMENT
-// ===============================
+// ==========================
+// ONLINE PAY
+// ==========================
 
 payBtn.addEventListener(
     "click",
@@ -461,9 +547,9 @@ payBtn.addEventListener(
 );
 
 
-// ===============================
+// ==========================
 // EDIT ORDER
-// ===============================
+// ==========================
 
 editBtn.addEventListener(
     "click",
@@ -477,9 +563,6 @@ editBtn.addEventListener(
             !shopOnline ||
             selectedFiles.length === 0;
 
-        cashBtn.disabled = false;
-        payBtn.disabled = false;
-
         window.scrollTo({
             top: 0,
             behavior: "smooth"
@@ -488,24 +571,23 @@ editBtn.addEventListener(
 );
 
 
-// ===============================
-// ORDER STATUS
-// ===============================
+// ==========================
+// CHECK ORDER STATUS
+// ==========================
 
-function startOrderStatus() {
+function startStatusChecking() {
 
     if (statusTimer) {
-
         clearInterval(statusTimer);
-
     }
 
     checkOrderStatus();
 
-    statusTimer = setInterval(
-        checkOrderStatus,
-        5000
-    );
+    statusTimer =
+        setInterval(
+            checkOrderStatus,
+            5000
+        );
 }
 
 
@@ -515,26 +597,28 @@ async function checkOrderStatus() {
 
     try {
 
-        const response = await fetch(
-            API_BASE +
-            "/api/orders/" +
-            encodeURIComponent(
-                currentOrderId
-            ) +
-            "?time=" +
-            Date.now()
-        );
+        const response =
+            await fetch(
+                API_BASE +
+                "/api/orders/" +
+                encodeURIComponent(
+                    currentOrderId
+                ) +
+                "?time=" +
+                Date.now()
+            );
 
         if (!response.ok) return;
 
         const data =
             await response.json();
 
-        if (!data.success || !data.order) {
-            return;
-        }
+        if (
+            !data.success ||
+            !data.order
+        ) return;
 
-        updateOrderStatus(
+        showOrderStatus(
             data.order.status
         );
 
@@ -548,13 +632,13 @@ async function checkOrderStatus() {
 }
 
 
-// ===============================
-// STATUS UI
-// ===============================
+// ==========================
+// STATUS TEXT
+// ==========================
 
-function updateOrderStatus(status) {
+function showOrderStatus(status) {
 
-    const statuses = {
+    const statusText = {
 
         CASH_PENDING:
             "🟡 Cash Pending — Show Order ID at shop",
@@ -572,14 +656,14 @@ function updateOrderStatus(status) {
             "🖨️ Your Order is Printing",
 
         COMPLETED:
-            "🎉 Order Completed — Collect your prints",
+            "🎉 Completed — Collect your prints",
 
         REJECTED:
             "❌ Order Rejected"
     };
 
-    orderStatusBox.textContent =
-        statuses[status] ||
+    orderStatus.textContent =
+        statusText[status] ||
         "🟡 Order Pending";
 
     if (
@@ -587,19 +671,16 @@ function updateOrderStatus(status) {
         status === "REJECTED"
     ) {
 
-        if (statusTimer) {
+        clearInterval(statusTimer);
 
-            clearInterval(statusTimer);
-
-            statusTimer = null;
-        }
+        statusTimer = null;
     }
 }
 
 
-// ===============================
-// RESTORE ORDER
-// ===============================
+// ==========================
+// RESTORE OLD ORDER
+// ==========================
 
 const savedOrder =
     localStorage.getItem(
@@ -611,41 +692,19 @@ if (savedOrder) {
     currentOrderId =
         savedOrder;
 
-    document.getElementById(
-        "orderId"
-    ).textContent =
-        savedOrder;
-
-    summary.classList.remove(
-        "hidden"
-    );
-
-    startOrderStatus();
+    startStatusChecking();
 }
 
 
-// ===============================
-// ESCAPE HTML
-// ===============================
-
-function escapeHTML(text) {
-
-    const div =
-        document.createElement("div");
-
-    div.textContent = text;
-
-    return div.innerHTML;
-}
-
-
-// ===============================
+// ==========================
 // START
-// ===============================
+// ==========================
 
-loadShopSettings();
+loadSettings();
 
 setInterval(
-    loadShopSettings,
+    loadSettings,
     5000
 );
+
+calculateTotal();

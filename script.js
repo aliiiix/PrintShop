@@ -447,3 +447,53 @@ payBtn.addEventListener(
 
     }
 );
+const cashBtn = document.getElementById("cashBtn");
+
+cashBtn.addEventListener("click", async function () {
+    const type = document.querySelector('input[name="printType"]:checked').value;
+    const copies = Math.max(1, Number(copiesInput.value) || 1);
+    const total = totalPages * copies * prices[type];
+
+    const currentOrderId = orderId.textContent;
+
+    try {
+        const response = await fetch(
+            "https://printshop-q8id.onrender.com/api/orders",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    orderId: currentOrderId,
+                    files: selectedFiles.map(file => ({
+                        name: file.name,
+                        pages: file.type === "application/pdf" ? 0 : 1
+                    })),
+                    printType: type,
+                    copies: copies,
+                    totalPages: totalPages,
+                    totalAmount: total,
+                    status: "CASH_PENDING"
+                })
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || "Order failed");
+        }
+
+        alert(
+            "✅ Order placed successfully!\n\n" +
+            "Order ID: " + currentOrderId + "\n" +
+            "Amount: ₹" + total + "\n\n" +
+            "💵 Pay at the shop when you collect your prints."
+        );
+
+    } catch (error) {
+        console.error(error);
+        alert("❌ Order save nahi hua. Please try again.");
+    }
+});

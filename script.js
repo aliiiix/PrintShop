@@ -34,16 +34,7 @@ const editBtn = document.getElementById("editBtn");
 // SHOP STATUS
 // ==========================
 
-const statusBox = document.createElement("div");
-
-statusBox.style.textAlign = "center";
-statusBox.style.fontWeight = "500";
-statusBox.style.margin = "0 0 8px 0";
-
-document.querySelector(".container").insertBefore(
-    statusBox,
-    document.querySelector(".container").children[1]
-);
+const statusBox = document.getElementById("shopStatus");
 
 
 // ==========================
@@ -145,30 +136,21 @@ function updateShopStatus() {
 
     if (shopOnline) {
 
-        statusBox.textContent =
-            "🟢 Shop Online";
-
+        statusBox.textContent = "🟢 Shop Online";
         statusBox.style.color = "green";
 
-        if (fileInput)
-            fileInput.disabled = false;
+        fileInput.disabled = false;
 
-        if (orderBtn)
-            orderBtn.disabled =
-                selectedFiles.length === 0;
+        orderBtn.disabled =
+            selectedFiles.length === 0;
 
     } else {
 
-        statusBox.textContent =
-            "🔴 Shop Offline";
-
+        statusBox.textContent = "🔴 Shop Offline";
         statusBox.style.color = "red";
 
-        if (fileInput)
-            fileInput.disabled = true;
-
-        if (orderBtn)
-            orderBtn.disabled = true;
+        fileInput.disabled = true;
+        orderBtn.disabled = true;
     }
 }
 
@@ -332,25 +314,114 @@ async function showFiles() {
 
     fileList.innerHTML = "";
 
-    for (const file of selectedFiles) {
+    for (let index = 0; index < selectedFiles.length; index++) {
+
+        const file = selectedFiles[index];
 
         let pages = 1;
 
-        if (
-            file.type ===
-            "application/pdf"
-        ) {
-            pages =
-                await getPDFPages(file);
+        if (file.type === "application/pdf") {
+            pages = await getPDFPages(file);
         }
 
-        const div =
-            document.createElement("div");
+        const item = document.createElement("div");
 
-        div.textContent =
-            `${file.name} — ${pages} page${pages > 1 ? "s" : ""}`;
+        item.style.display = "flex";
+        item.style.alignItems = "center";
+        item.style.gap = "10px";
+        item.style.marginTop = "10px";
 
-        fileList.appendChild(div);
+        // THUMBNAIL
+        const thumb = document.createElement("div");
+
+        thumb.style.width = "55px";
+        thumb.style.height = "55px";
+        thumb.style.minWidth = "55px";
+        thumb.style.borderRadius = "8px";
+        thumb.style.overflow = "hidden";
+        thumb.style.background = "#eee";
+        thumb.style.display = "flex";
+        thumb.style.alignItems = "center";
+        thumb.style.justifyContent = "center";
+
+        if (file.type.startsWith("image/")) {
+
+            const img = document.createElement("img");
+
+            img.src = URL.createObjectURL(file);
+
+            img.style.width = "100%";
+            img.style.height = "100%";
+            img.style.objectFit = "cover";
+
+            thumb.appendChild(img);
+
+        } else {
+
+            thumb.textContent = "📄";
+            thumb.style.fontSize = "28px";
+        }
+
+
+        // FILE NAME + PAGES
+        const info = document.createElement("div");
+
+        info.style.flex = "1";
+        info.style.minWidth = "0";
+
+        const name = document.createElement("div");
+
+        name.textContent = file.name;
+
+        name.style.overflow = "hidden";
+        name.style.textOverflow = "ellipsis";
+        name.style.whiteSpace = "nowrap";
+
+        const page = document.createElement("small");
+
+        page.textContent =
+            `${pages} page${pages > 1 ? "s" : ""}`;
+
+        info.appendChild(name);
+        info.appendChild(page);
+
+
+        // REMOVE
+        const remove = document.createElement("button");
+
+        remove.type = "button";
+        remove.textContent = "✕";
+
+        remove.style.border = "none";
+        remove.style.background = "#eee";
+        remove.style.color = "red";
+        remove.style.borderRadius = "50%";
+        remove.style.width = "30px";
+        remove.style.height = "30px";
+
+        remove.onclick = function () {
+
+            selectedFiles.splice(index, 1);
+
+            const dt = new DataTransfer();
+
+            selectedFiles.forEach(file => {
+                dt.items.add(file);
+            });
+
+            fileInput.files = dt.files;
+
+            showFiles();
+            calculateTotal();
+            updateShopStatus();
+        };
+
+
+        item.appendChild(thumb);
+        item.appendChild(info);
+        item.appendChild(remove);
+
+        fileList.appendChild(item);
     }
 }
 

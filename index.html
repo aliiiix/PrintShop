@@ -1,12 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>PrintShop</title>
-
     <link rel="stylesheet" href="style.css">
 </head>
 
@@ -14,106 +11,58 @@
 
     <div class="container">
 
-        <!-- LOGO -->
-        <div class="logo">
-            🖨️ PrintShop
+        <header>
+            <h1>🖨️ PrintShop</h1>
+            <p>Fast & Easy Printing</p>
+        </header>
+
+        <!-- SHOP STATUS -->
+        <div id="shopStatus" class="shop-status">
+            🟢 Shop Online
         </div>
 
-        <h1>Print Your Documents</h1>
+        <!-- UPLOAD -->
+        <section class="card">
+            <h2>Upload Files</h2>
 
-        <!-- ========================= -->
-        <!-- UPLOAD / ORDER CARD -->
-        <!-- ========================= -->
+            <input
+                type="file"
+                id="fileInput"
+                accept=".pdf,.jpg,.jpeg,.png,.webp"
+                multiple
+            >
 
-        <div class="card" id="uploadCard">
+            <div id="fileList"></div>
+        </section>
 
-            <h3>Upload File</h3>
-
-            <p class="upload-subtitle">
-                PDF, JPG, PNG or WebP
-            </p>
-
-            <label class="upload-box" for="pdfFile">
-
-                <div class="upload-icon">
-                    📄
-                </div>
-
-                <h3>Upload File</h3>
-
-                <p>Tap here to select your File</p>
-
-                <input
-                    type="file"
-                    id="pdfFile"
-                    accept="application/pdf,image/jpeg,image/png,image/webp"
-                    multiple
-                >
-
-            </label>
-
-            <div id="fileInfo" class="file-info"></div>
-                
-                <div id="filePreview" class="file-preview"></div>
-
-
-            <!-- PRINT TYPE -->
-
-            <h3 class="section-title">
-                Print Type
-            </h3>
+        <!-- PRINT TYPE -->
+        <section class="card">
+            <h2>Print Type</h2>
 
             <div class="print-options">
 
-                <label class="option">
-
-                    <input
-                        type="radio"
-                        name="printType"
-                        value="bw"
-                        checked
-                    >
-
+                <label>
+                    <input type="radio" name="printType" value="bw" checked>
                     <span>
-                        ⚫ B/W
+                        🖤 Black & White
+                        <small id="bwPriceLabel">₹2 / page</small>
                     </span>
-
-                    <small>
-                        ₹2 / page
-                    </small>
-
                 </label>
 
-
-                <label class="option">
-
-                    <input
-                        type="radio"
-                        name="printType"
-                        value="color"
-                    >
-
+                <label>
+                    <input type="radio" name="printType" value="color">
                     <span>
                         🌈 Colour
+                        <small id="colorPriceLabel">₹10 / page</small>
                     </span>
-
-                    <small>
-                        ₹10 / page
-                    </small>
-
                 </label>
 
             </div>
+        </section>
 
-
-            <!-- COPIES -->
-
-            <label
-                class="copies-label"
-                for="copies"
-            >
-                Number of Copies
-            </label>
+        <!-- COPIES -->
+        <section class="card">
+            <h2>Copies</h2>
 
             <input
                 type="number"
@@ -121,150 +70,92 @@
                 min="1"
                 value="1"
             >
+        </section>
 
+        <!-- TOTAL -->
+        <section class="card total-card">
 
-            <!-- TOTAL -->
+            <div>
+                <span>Total Pages</span>
+                <strong id="totalPages">0</strong>
+            </div>
 
-            <div class="price-box">
+            <div>
+                <span>Total Amount</span>
+                <strong id="totalAmount">₹0</strong>
+            </div>
 
-                <span>
-                    Total
-                </span>
+        </section>
 
-                <strong id="totalPrice">
-                    ₹0
-                </strong>
+        <button id="orderBtn" class="primary-btn">
+            Continue
+        </button>
+
+        <!-- SUMMARY -->
+        <section id="summary" class="card summary hidden">
+
+            <h2>Order Summary</h2>
+
+            <p>
+                <strong>Order ID:</strong>
+                <span id="orderId"></span>
+            </p>
+
+            <p>
+                <strong>Files:</strong>
+                <span id="summaryFiles"></span>
+            </p>
+
+            <p>
+                <strong>Pages:</strong>
+                <span id="summaryPages"></span>
+            </p>
+
+            <p>
+                <strong>Print Type:</strong>
+                <span id="summaryType"></span>
+            </p>
+
+            <p>
+                <strong>Copies:</strong>
+                <span id="summaryCopies"></span>
+            </p>
+
+            <p>
+                <strong>Total:</strong>
+                ₹<span id="summaryTotal"></span>
+            </p>
+
+            <!-- ORDER STATUS -->
+            <div id="orderStatusBox" class="order-status">
+                🟡 Order Pending
+            </div>
+
+            <div class="payment-buttons">
+
+                <button id="payBtn" class="primary-btn">
+                    💳 Online Pay
+                </button>
+
+                <button id="cashBtn" class="secondary-btn">
+                    💵 Pay Cash
+                </button>
 
             </div>
 
-
-            <!-- CONTINUE -->
-
-            <button id="orderBtn">
-                Continue →
+            <button id="editBtn" class="edit-btn">
+                ✏️ Edit Order
             </button>
 
-        </div>
+        </section>
 
-
-        <!-- ========================= -->
-        <!-- ORDER SUMMARY -->
-        <!-- IMPORTANT: OUTSIDE uploadCard -->
-        <!-- ========================= -->
-
-        <div
-            id="summarySection"
-            class="card summary-card"
-            style="display: none;"
-        >
-
-            <h2>
-                Order Summary
-            </h2>
-            <div class="order-id-box">
-    <span>🆔 Order ID</span>
-    <strong id="orderId">PS-000000</strong>
-</div>
-
-
-            <!-- FILE LIST -->
-
-            <div id="summaryFiles"></div>
-
-
-            <!-- PAGES -->
-
-            <div class="summary-row">
-
-                <span>
-                    📄 Total Pages
-                </span>
-
-                <strong id="summaryPages">
-                    0
-                </strong>
-
-            </div>
-
-
-            <!-- PRINT TYPE -->
-
-            <div class="summary-row">
-
-                <span>
-                    🖨️ Print Type
-                </span>
-
-                <strong id="summaryType">
-                    B/W
-                </strong>
-
-            </div>
-
-
-            <!-- COPIES -->
-
-            <div class="summary-row">
-
-                <span>
-                    📑 Copies
-                </span>
-
-                <strong id="summaryCopies">
-                    1
-                </strong>
-
-            </div>
-
-
-            <!-- TOTAL -->
-
-            <div class="price-box">
-
-                <span>
-                    Total
-                </span>
-
-                <strong id="summaryTotal">
-                    ₹0
-                </strong>
-
-            </div>
-
-
-            <!-- PAYMENT -->
-
-            <button id="payBtn">
-                Online Pay →
-            </button>
-           <button id="cashBtn" type="button">
-            Pay Cash
-           </button>
-
-
-            <!-- BACK -->
-
-            <button
-                id="backBtn"
-                type="button"
-            >
-                ← Edit Order
-            </button>
-
-        </div>
-
-
-        <!-- FOOTER -->
-
-        <p class="footer">
-            Fast • Simple • No Queue
-        </p>
+        <footer>
+            <p>PrintShop © 2026</p>
+        </footer>
 
     </div>
 
-
-    <script src="script.js?v=2"></script>
+    <script src="script.js?v=3"></script>
 
 </body>
-
 </html>

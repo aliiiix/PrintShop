@@ -105,6 +105,9 @@ h1 {
     background: #fff;
     padding: 20px 15px 15px;
     cursor: pointer;
+ transparent;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .print-option.selected,

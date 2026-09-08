@@ -92,7 +92,7 @@ function updateShopStatus() {
 
     if (shopOnline) {
 
-        shopStatus.textContent = "🟢 Shop Online";
+        shopStatus.textContent = " Online";
         shopStatus.className = "shop-status online";
 
         fileInput.disabled = false;
@@ -100,7 +100,7 @@ function updateShopStatus() {
 
     } else {
 
-        shopStatus.textContent = "🔴 Shop Offline";
+        shopStatus.textContent = " Offline";
         shopStatus.className = "shop-status offline";
 
         fileInput.disabled = true;

@@ -43,111 +43,123 @@ h1 {
     box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
 }
 
-.upload-box {
-    display: block;
-    border: 2px dashed #aaa;
-    border-radius: 14px;
-    padding: 25px 15px;
-    text-align: center;
-    cursor: pointer;
-    margin-bottom: 20px;
-}
+/* =========================
+   UPLOAD BOX
+========================= */
 
-.upload-icon {
-    font-size: 42px;
-    margin-bottom: 8px;
-}
-
-.upload-box h3 {
-    font-size: 20px;
-    margin-bottom: 6px;
-}
-
-.upload-box p {
-    color: #777;
-    font-size: 14px;
-}
-
-#pdfFile {
-    display: none;
-}
-
-.file-info {
-    font-size: 14px;
-    margin-bottom: 20px;
-    color: #444;
-}
-
-.section-title {
-    font-size: 18px;
-    margin-bottom: 12px;
-}
-
-.print-options {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 22px;
-}
-
-.option {
-    flex: 1;
-    border: 2px solid #ddd;
-    border-radius: 12px;
-    padding: 14px 10px;
-    cursor: pointer;
-}
-
-.option:has(input:checked) {
-    border-color: #111;
-    background: #f5f5f5;
-}
-
-.option input {
-    margin-right: 5px;
-}
-
-.option span {
-    font-weight: bold;
-    display: block;
-    margin-bottom: 5px;
-}
-
-.option small {
-    color: #666;
-}
-
-.copies-label {
-    display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
-}
-
-#copies {
-    width: 100%;
-    padding: 13px;
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    font-size: 16px;
-    margin-bottom: 20px;
-}
-
-.price-box {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #f1f1f1;
-    padding: 15px;
-    border-radius: 12px;
+.upload-card h2,
+.print-card h2 {
+    font-size: 28px;
     margin-bottom: 18px;
 }
 
-.price-box span {
-    font-size: 16px;
+.upload-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    width: 100%;
+    min-height: 330px;
+
+    box-sizing: border-box;
+
+    border: 4px dashed #aaa;
+    border-radius: 25px;
+
+    background: #fff;
+
+    cursor: pointer;
+    text-align: center;
 }
 
-.price-box strong {
-    font-size: 24px;
+.upload-icon {
+    font-size: 80px;
+    margin-bottom: 20px;
 }
+
+.upload-title {
+    font-size: 42px;
+    font-weight: 700;
+}
+
+.upload-subtitle {
+    font-size: 27px;
+    color: #777;
+    margin-top: 20px;
+}
+
+
+/* =========================
+   PRINT TYPE
+========================= */
+
+.print-options {
+    display: flex;
+    gap: 35px;
+    width: 100%;
+}
+
+.print-option {
+    position: relative;
+
+    flex: 1;
+    min-height: 250px;
+
+    box-sizing: border-box;
+
+    border: 5px solid #ddd;
+    border-radius: 28px;
+
+    padding: 35px;
+
+    background: #fff;
+
+    cursor: pointer;
+}
+
+.print-option:has(input:checked) {
+    border-color: #111;
+}
+
+.print-option input {
+    position: absolute;
+
+    top: 28px;
+    left: 28px;
+
+    width: 30px;
+    height: 30px;
+
+    margin: 0;
+}
+
+.print-content {
+    padding-top: 75px;
+}
+
+.print-name {
+    font-size: 34px;
+    font-weight: 700;
+
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.black-circle {
+    font-size: 65px;
+    line-height: 1;
+    color: #333;
+}
+
+.print-price {
+    margin-top: 30px;
+
+    font-size: 30px;
+    color: #555;
+}
+
 
 #orderBtn {
     width: 100%;
@@ -406,28 +418,57 @@ button:disabled {
 
 @media (max-width: 600px) {
 
-    .print-options {
-        gap: 10px;
-    }
-
-    .print-options label {
-        min-height: 150px;
-        padding: 12px;
+    .upload-box {
+        min-height: 250px;
         border-radius: 20px;
     }
 
-    .print-options label span {
-        font-size: 17px;
+    .upload-icon {
+        font-size: 60px;
+    }
+
+    .upload-title {
+        font-size: 30px;
+    }
+
+    .upload-subtitle {
+        font-size: 20px;
+    }
+
+    .print-options {
         gap: 12px;
     }
 
-    .print-options label small {
-        font-size: 16px;
+    .print-option {
+        min-height: 180px;
+        padding: 15px;
+        border-width: 3px;
+        border-radius: 20px;
     }
 
-    .print-options input {
-        width: 18px;
-        height: 18px;
-        margin-right: 7px;
+    .print-option input {
+        top: 15px;
+        left: 15px;
+
+        width: 22px;
+        height: 22px;
+    }
+
+    .print-content {
+        padding-top: 50px;
+    }
+
+    .print-name {
+        font-size: 20px;
+        gap: 7px;
+    }
+
+    .black-circle {
+        font-size: 38px;
+    }
+
+    .print-price {
+        font-size: 18px;
+        margin-top: 20px;
     }
 }

@@ -22,43 +22,73 @@
         </div>
 
         <!-- UPLOAD -->
-        <section class="card">
-            <h2>Upload Files</h2>
+    <section class="card upload-card">
+    <h2>Upload File</h2>
 
-            <input
-                type="file"
-                id="fileInput"
-                accept=".pdf,.jpg,.jpeg,.png,.webp"
-                multiple
-            >
+    <label for="fileInput" class="upload-box">
+        <div class="upload-icon">📄</div>
+        <div class="upload-title">Upload File</div>
+        <div class="upload-subtitle">Tap here to select your File</div>
+    </label>
 
-            <div id="fileList"></div>
-        </section>
+    <input
+        type="file"
+        id="fileInput"
+        accept=".pdf,.jpg,.jpeg,.png,.webp"
+        multiple
+        hidden
+    >
+
+    <div id="fileList"></div>
+    </section>
 
         <!-- PRINT TYPE -->
-        <section class="card">
-            <h2>Print Type</h2>
+    <section class="card print-card">
+    <h2>Print Type</h2>
 
-            <div class="print-options">
+    <div class="print-options">
 
-                <label>
-                    <input type="radio" name="printType" value="bw" checked>
-                    <span>
-                        🖤 Black & White
-                        <small id="bwPriceLabel">₹ / page</small>
-                    </span>
-                </label>
+        <label class="print-option selected">
+            <input
+                type="radio"
+                name="printType"
+                value="bw"
+                checked
+            >
 
-                <label>
-                    <input type="radio" name="printType" value="color">
-                    <span>
-                        🌈 Colour
-                        <small id="colorPriceLabel">₹ / page</small>
-                    </span>
-                </label>
+            <div class="print-content">
+                <div class="print-name">
+                    <span class="black-circle">●</span>
+                    B/W
+                </div>
 
+                <div class="print-price" id="bwPriceLabel">
+                    ₹ / page
+                </div>
             </div>
-        </section>
+        </label>
+
+
+        <label class="print-option">
+            <input
+                type="radio"
+                name="printType"
+                value="color"
+            >
+
+            <div class="print-content">
+                <div class="print-name">
+                    🌈 Colour
+                </div>
+
+                <div class="print-price" id="colorPriceLabel">
+                    ₹ / page
+                </div>
+            </div>
+        </label>
+
+    </div>
+</section>
 
         <!-- COPIES -->
         <section class="card">

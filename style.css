@@ -137,6 +137,22 @@ h1 {
     color: #555;
 }
 
+/*copy*/ 
+.copies-label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+#copies {
+    width: 100%;
+    padding: 13px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
 /* BUTTONS */
 
 #orderBtn {

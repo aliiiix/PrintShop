@@ -136,8 +136,17 @@ function updateShopStatus() {
 
     if (shopOnline) {
 
-        statusBox.textContent = "🟢 Shop Online";
-        statusBox.style.color = "green";
+        statusBox.textContent = "Online";
+
+        statusBox.style.display = "block";
+        statusBox.style.textAlign = "center";
+        statusBox.style.fontWeight = "bold";
+        statusBox.style.fontSize = "20px";
+        statusBox.style.padding = "14px";
+        statusBox.style.margin = "10px 0 20px";
+        statusBox.style.borderRadius = "15px";
+        statusBox.style.background = "#e8f8ee";
+        statusBox.style.color = "#16833b";
 
         fileInput.disabled = false;
 
@@ -146,8 +155,17 @@ function updateShopStatus() {
 
     } else {
 
-        statusBox.textContent = "🔴 Shop Offline";
-        statusBox.style.color = "red";
+        statusBox.textContent = "Offline";
+
+        statusBox.style.display = "block";
+        statusBox.style.textAlign = "center";
+        statusBox.style.fontWeight = "bold";
+        statusBox.style.fontSize = "20px";
+        statusBox.style.padding = "14px";
+        statusBox.style.margin = "10px 0 20px";
+        statusBox.style.borderRadius = "15px";
+        statusBox.style.background = "#ffe8e8";
+        statusBox.style.color = "#d62828";
 
         fileInput.disabled = true;
         orderBtn.disabled = true;

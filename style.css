@@ -90,10 +90,12 @@ h1 {
     color: #444;
 }
 
-/* PRINT TYPE */
-.print-options {
-    display: flex;
-    gap: 12px;
+.print-option input {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    width: 18px;
+    height: 18px;
 }
 
 .print-option {
@@ -104,7 +106,23 @@ h1 {
     border-radius: 18px;
     background: #fff;
     padding: 20px 15px 15px;
+ transparent;
     cursor: pointer;
+    transition: all 0.2s ease;
+    
+/* PRINT TYPE */
+.print-options {
+    display: none;
+}
+
+.print-option {
+    position: relative;
+    flex: 1;
+    min-height: 180px;
+    border: 2px solid #ddd;
+    border-radius: 18px;
+    background: #fff;
+    padding: 20px 15px 15px;
  transparent;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -115,14 +133,12 @@ h1 {
     border: 2.5px solid #111;
     background: #fff;
 }
-
-.print-option input {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    width: 18px;
-    height: 18px;
+.print-option.selected,
+.print-option:has(input:checked) {
+    border: 2.5px solid #111;
+    background: #fff;
 }
+
 
 .print-content {
     height: 100%;

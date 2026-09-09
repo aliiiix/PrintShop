@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PrintShop</title>
     <link rel="stylesheet" href="style.css">
-</head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 
+</head>
 <body>
 
     <div class="container">
@@ -16,20 +17,20 @@
             <p>Fast & Easy Printing</p>
         </header>
 
-        <!-- SHOP STATUS -->
-        <div id="shopStatus" class="shop-status">
-         Online
+        <!-- SHOP STATUS BADGE -->
+        <div id="shopStatusBadge" class="shop-status">
+            Online
         </div>
 
-        <!-- MAIN SINGLE CARD (Merged All Input Sections) -->
-        <section class="card main-form-card">
+        <!-- MAIN FORM CARD -->
+        <section id="mainFormCard" class="card main-form-card">
             
             <!-- UPLOAD SECTION -->
             <div class="card-section">
                 <h2>Upload File</h2>
-                <label for="fileInput" class="upload-box">
+                <label for="fileInput" class="upload-box" id="fileDropArea">
                     <div class="upload-icon">📄</div>
-                    <div class="upload-title">Upload File</div>
+                    <div class="upload-title" id="fileNameDisplay">Upload File</div>
                     <div class="upload-subtitle">Tap here to select your File</div>
                 </label>
                 <input
@@ -39,29 +40,33 @@
                     multiple
                     hidden
                 >
-                <div id="fileList"></div>
-            </div>
+                    
+    <!-- Dynamic File List & Thumbnail Container -->
+    <div id="fileListContainer" class="file-list-container"></div>
+</div>
 
             <!-- PRINT TYPE SECTION -->
             <div class="card-section">
                 <h2>Print Type</h2>
                 <div class="print-options">
-                    <label class="print-option selected">
+            <label class="print-option selected">
+
+
                         <input
                             type="radio"
                             id="typeBW"
                             name="printType"
                             value="bw"
                             checked
-            
-                            >
+                            </label>
+                        
                         <div class="print-content">
                             <div class="print-name">
                                 <span class="black-circle">●</span>
                                 B/W
                             </div>
                             <div class="print-price" id="bwPriceLabel">
-                                ₹ / page
+                                ₹2 / page
                             </div>
                         </div>
                     </label>
@@ -69,6 +74,7 @@
                     <label class="print-option">
                         <input
                             type="radio"
+                            id="typeColor"
                             name="printType"
                             value="color"
                         >
@@ -77,19 +83,20 @@
                                 🌈 Colour
                             </div>
                             <div class="print-price" id="colorPriceLabel">
-                                ₹ / page
+                                ₹10 / page
                             </div>
                         </div>
                     </label>
                 </div>
             </div>
+        
 
             <!-- COPIES SECTION -->
             <div class="card-section">
                 <h2>Copies</h2>
                 <input
                     type="number"
-                    id="copies"
+                    id="copiesInput"
                     min="1"
                     value="1"
                 >
@@ -107,54 +114,51 @@
                 </div>
             </div>
 
+            <button id="orderBtn" class="primary-btn">
+                Continue →
+            </button>
+        
         </section>
-
-        <button id="orderBtn" class="primary-btn">
-            Continue
-        </button>
-
-        <!-- SUMMARY -->
+        
+        <!-- Continue click sound -->
+        
+        <!-- ORDER SUMMARY & APPROVAL SECTION -->
         <section id="summary" class="card summary hidden">
 
             <h2>Order Summary</h2>
 
             <p>
                 <strong>Order ID:</strong>
-                <span id="orderId"></span>
+                <span id="summaryOrderId">-</span>
             </p>
 
             <p>
                 <strong>Files:</strong>
-                <span id="summaryFiles"></span>
+                <span id="summaryFiles">-</span>
             </p>
 
             <p>
                 <strong>Pages:</strong>
-                <span id="summaryPages"></span>
+                <span id="summaryPages">0</span>
             </p>
 
             <p>
                 <strong>Print Type:</strong>
-                <span id="summaryType"></span>
+                <span id="summaryType">B/W</span>
             </p>
 
             <p>
                 <strong>Copies:</strong>
-                <span id="summaryCopies"></span>
+                <span id="summaryCopies">1</span>
             </p>
 
             <p>
                 <strong>Total:</strong>
-                ₹<span id="summaryTotal"></span>
+                <span id="summaryTotal">₹0</span>
             </p>
 
-            <!-- ORDER STATUS -->
-            <div id="orderStatusBox" class="order-status">
-                🟡 Order Pending
-            </div>
-
-            <div class="payment-buttons">
-
+            <!-- PAYMENT BUTTONS -->
+            <div id="paymentButtonsGroup" class="payment-buttons">
                 <button id="payBtn" class="primary-btn">
                     💳 Online Pay
                 </button>
@@ -162,9 +166,12 @@
                 <button id="cashBtn" class="secondary-btn">
                     💵 Pay Cash
                 </button>
-
             </div>
 
+            <!-- REAL-TIME STATUS & ANIMATION BOX -->
+            <div id="orderStatusContainer"></div>
+
+            <!-- EDIT ORDER BUTTON -->
             <button id="editBtn" class="edit-btn">
                  ← Edit Order
             </button>
@@ -178,7 +185,10 @@
 
     </div>
 
-    <script src="script.js?v=4"></script>
+    <script src="script.js?v=6"></script>
+    <!-- Audio Tag for Click Sound -->
+<audio id="clickSound" src="faaah.mp3" preload="auto"></audio>
 
 </body>
-</html>
+    </html>
+    

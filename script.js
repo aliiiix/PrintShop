@@ -267,12 +267,25 @@ function goToSummaryScreen() {
     const orderId = "PS-" + Math.random().toString(36).substr(2, 6).toUpperCase();
 
     currentOrder = {
-        orderId,
-        files: selectedFiles.map(f => ({ name: f.fileObject.name, pages: f.pages, copies: f.copies })),
-        printType,
-        totalPages: totalPagesSum,
-        totalAmount
-    };
+    orderId,
+    
+    files: selectedFiles.map(f => ({
+        name: f.fileObject.name,
+        pages: f.pages,
+        copies: f.copies
+    })),
+    
+    printType,
+    
+    // Backend compatibility
+    copies: selectedFiles.reduce(
+        (sum, f) => sum + Number(f.copies || 1),
+        0
+    ),
+    
+    totalPages: totalPagesSum,
+    totalAmount
+};
 
     // Update Summary Screen UI
     if ($("summaryOrderId")) $("summaryOrderId").textContent = orderId;
@@ -401,4 +414,3 @@ $("cashBtn")?.addEventListener("click", () => submitOrder("cash"));
 
 loadSettings();
 setInterval(loadSettings, 5000);
-    

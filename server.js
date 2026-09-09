@@ -8,7 +8,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(express.json({ limit: "10mb" }));
 
-// CORS
+// CORS Setup
 app.use((req, res, next) => {
     res.header("Access-Control-Allow-Origin", "*");
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -25,7 +25,7 @@ app.use(express.static(__dirname));
 
 
 // =========================
-// ORDER MODEL
+// ORDER MODEL (Schema Validation Fixed)
 // =========================
 
 const orderSchema = new mongoose.Schema({
@@ -42,18 +42,17 @@ const orderSchema = new mongoose.Schema({
 
     printType: {
         type: String,
-        enum: ["bw", "color"],
         required: true
     },
 
     copies: {
         type: Number,
-        required: true
+        default: 1
     },
 
     totalPages: {
         type: Number,
-        required: true
+        default: 1
     },
 
     totalAmount: {
@@ -63,15 +62,6 @@ const orderSchema = new mongoose.Schema({
 
     status: {
         type: String,
-        enum: [
-            "CASH_PENDING",
-            "PENDING_PAYMENT",
-            "PAID",
-            "ACCEPTED",
-            "PRINTING",
-            "COMPLETED",
-            "REJECTED"
-        ],
         default: "PENDING_PAYMENT"
     }
 }, {
@@ -199,7 +189,7 @@ app.get("/api/health", (req, res) => {
 
 
 // =========================
-// CREATE ORDER
+// CREATE ORDER (Fixed Request Mapping)
 // =========================
 
 app.post("/api/orders", async (req, res) => {
@@ -214,7 +204,20 @@ app.post("/api/orders", async (req, res) => {
             });
         }
 
-        const order = await Order.create(req.body);
+        // Auto mapping frontend keys to database fields
+        const payload = {
+            orderId: req.body.orderId || req.body.id || `PS-${Math.random().toString(36).substring(2, 8).toUpperCase()}`,
+            files: req.body.files || [],
+            printType: req.body.printType || "bw",
+            copies: Number(req.body.copies) || 1,
+            totalPages: Number(req.body.totalPages || req.body.pages) || 1,
+            totalAmount: Number(req.body.totalAmount || req.body.total) || 0,
+            status: req.body.status || (req.body.paymentType === 'cash' ? 'CASH_PENDING' : 'PENDING_PAYMENT')
+        };
+
+        const order = await Order.create(payload);
+
+        console.log("Order created successfully ✅:", order.orderId);
 
         res.status(201).json({
             success: true,
@@ -222,11 +225,12 @@ app.post("/api/orders", async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Create order error:", error);
+        console.error("Create order error detailed:", error.message);
 
         res.status(500).json({
             success: false,
-            message: "Could not create order"
+            message: "Could not create order",
+            error: error.message
         });
     }
 });
@@ -300,23 +304,6 @@ app.post("/api/orders/:orderId/status", async (req, res) => {
     try {
         const { status } = req.body;
 
-        const allowedStatuses = [
-            "CASH_PENDING",
-            "PENDING_PAYMENT",
-            "PAID",
-            "ACCEPTED",
-            "PRINTING",
-            "COMPLETED",
-            "REJECTED"
-        ];
-
-        if (!allowedStatuses.includes(status)) {
-            return res.status(400).json({
-                success: false,
-                message: "Invalid status"
-            });
-        }
-
         const order = await Order.findOneAndUpdate(
             {
                 orderId: req.params.orderId
@@ -388,3 +375,4 @@ async function startServer() {
 }
 
 startServer();
+                        
